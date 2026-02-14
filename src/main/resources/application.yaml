@@ -1,3 +1,20 @@
 spring:
   application:
     name: questory
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?serverTimezone=UTC
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+mybatis:
+  mapper-locations: classpath:/mapper/**/*.xml
+
+logging:
+  level:
+    com:
+      ssafy: TRACE
+  pattern:
+    console: "%d{HH:mm:ss} [%level] %c{36} %m%n"
