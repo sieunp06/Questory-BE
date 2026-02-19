@@ -21,3 +21,11 @@ logging:
       ssafy: TRACE
   pattern:
     console: "%d{HH:mm:ss} [%level] %c{36} %m%n"
+
+jwt:
+  access:
+    secret: ${JWT_ACCESS_SECRET}
+    expiration_time: 900000        # 15분 (ms)
+  refresh:
+    secret: ${JWT_REFRESH_SECRET}
+    expiration_time: 1209600000    # 14일 (ms)
