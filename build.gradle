@@ -65,6 +65,10 @@ dependencies {
 	// Spring Rest Docs
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 	asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+
+	// mail
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	testImplementation 'org.springframework.boot:spring-boot-starter-mail-test'
 }
 
 tasks.named('test') {

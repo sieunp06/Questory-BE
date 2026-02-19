@@ -41,14 +41,20 @@ public class SecurityConfig {
 
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .ignoringRequestMatchers("/api/member/register")
+                        .ignoringRequestMatchers(
+                                "/api/member/register",
+                                "/api/email/send-verify",
+                                "/api/email/verify-code"
+                        )
                 )
 
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers(
                                 "/docs/**",
-                                "/api/member/**"
+                                "/api/member/**",
+                                "/api/email/send-verify",
+                                "/api/email/verify-code"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
