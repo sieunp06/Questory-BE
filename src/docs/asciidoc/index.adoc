@@ -1,0 +1,21 @@
+= Questory API 문서
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectnums:
+:snippets: build/generated-snippets
+
+== 회원 API
+
+=== 회원가입
+
+==== 요청 필드
+include::{snippets}/member-register/request-fields.adoc[]
+
+==== 응답 필드
+include::{snippets}/member-register/response-fields.adoc[]
+
+==== 400 에러 응답
+include::{snippets}/member-register-400/http-response.adoc[]
