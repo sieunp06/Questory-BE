@@ -19,7 +19,7 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/register")
-    public ResponseEntity<MemberResponseDto> register(@Valid @RequestBody MemberRegisterRequestDto memberRegistRequestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.register(memberRegistRequestDto));
+    public ResponseEntity<MemberResponseDto> register(@Valid @RequestBody MemberRegisterRequestDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.register(dto));
     }
 }
