@@ -12,10 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 
@@ -35,7 +32,7 @@ public class MemberController {
         TokenResponseDto tokens = memberService.login(dto);
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokens.refreshToken())
                 .httpOnly(true)
-                .path("/api/auth/refresh")
+                .path("/")
                 .maxAge(Duration.ofDays(14))
                 .build();
 
@@ -43,5 +40,29 @@ public class MemberController {
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokens.accessToken())
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 .body(ApiResponse.ok("로그인에 성공했습니다."));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<Void>> refresh(@CookieValue(name = "refresh_token", required = false) String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.fail("Refresh token이 존재하지 않습니다.."));
+        }
+
+        String accessToken = memberService.refresh(refreshToken);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .body(ApiResponse.ok("Access Token 재발급에 성공했습니다."));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout() {
+        ResponseCookie deleteRefreshCookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(Duration.ZERO)
+                .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteRefreshCookie.toString())
+                .body(ApiResponse.ok("로그아웃에 성공했습니다."));
     }
 }

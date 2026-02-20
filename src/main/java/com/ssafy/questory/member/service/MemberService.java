@@ -2,8 +2,8 @@ package com.ssafy.questory.member.service;
 
 import com.ssafy.questory.common.exception.CustomException;
 import com.ssafy.questory.common.exception.ErrorCode;
-import com.ssafy.questory.config.security.jwt.JwtService;
-import com.ssafy.questory.config.security.jwt.LoginUserDetailsService;
+import com.ssafy.questory.security.config.jwt.JwtService;
+import com.ssafy.questory.security.config.jwt.LoginUserDetailsService;
 import com.ssafy.questory.member.domain.Member;
 import com.ssafy.questory.member.domain.MemberStatus;
 import com.ssafy.questory.member.dto.request.LoginRequestDto;
@@ -76,6 +76,15 @@ public class MemberService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public String refresh(String refreshToken) {
+        String email = jwtService.extractUsername(refreshToken, JwtService.TokenType.REFRESH);
+
+        validateExistAndActiveMember(email);
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        return jwtService.generateAccessToken(userDetails);
     }
 
     private void authenticate(String email, String password) {

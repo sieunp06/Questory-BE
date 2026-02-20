@@ -1,7 +1,7 @@
-package com.ssafy.questory.config.security;
+package com.ssafy.questory.security.config;
 
-import com.ssafy.questory.config.security.jwt.JwtAuthenticationEntryPoint;
-import com.ssafy.questory.config.security.jwt.JwtAuthenticationFilter;
+import com.ssafy.questory.security.config.jwt.JwtAuthenticationEntryPoint;
+import com.ssafy.questory.security.config.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
 
@@ -34,6 +35,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http    .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -41,6 +43,7 @@ public class SecurityConfig {
 
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                         .ignoringRequestMatchers(
                                 "/api/member/register",
                                 "/api/member/login",
@@ -53,8 +56,11 @@ public class SecurityConfig {
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers(
                                 "/docs/**",
+                                "/error",
+                                "/api/csrf",
                                 "/api/member/register",
                                 "/api/member/login",
+                                "/api/member/refresh",
                                 "/api/email/send-verify",
                                 "/api/email/verify-code"
                         ).permitAll()
