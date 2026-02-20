@@ -28,7 +28,7 @@ public class EmailVerificationController {
     }
 
     @PostMapping("/verify-code")
-    public ResponseEntity<ApiResponse<Void>> verifyCode(@RequestBody EmailVerificationRequestDto dto) {
+    public ResponseEntity<ApiResponse<Void>> verifyCode(@Valid @RequestBody EmailVerificationRequestDto dto) {
         verifyService.checkVerifyCode(dto);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("인증이 완료되었습니다."));
     }
