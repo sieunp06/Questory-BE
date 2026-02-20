@@ -45,3 +45,6 @@ jwt:
   refresh:
     secret: ${JWT_REFRESH_SECRET}
     expiration_time: 1209600000    # 14일 (ms)
+
+front:
+  url: ${FRONT_URL}
