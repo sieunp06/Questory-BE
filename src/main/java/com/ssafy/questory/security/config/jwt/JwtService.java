@@ -1,4 +1,4 @@
-package com.ssafy.questory.config.security.jwt;
+package com.ssafy.questory.security.config.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;

@@ -1,7 +1,6 @@
-package com.ssafy.questory.config.security.jwt;
+package com.ssafy.questory.security.config.jwt;
 
-import com.ssafy.questory.config.security.MemberAuthPolicy;
-import com.ssafy.questory.member.domain.Member;
+import com.ssafy.questory.security.config.MemberAuthPolicy;
 import com.ssafy.questory.member.domain.SecurityMember;
 import com.ssafy.questory.member.dto.security.LoginPrincipalRow;
 import com.ssafy.questory.member.repository.MemberRepository;
