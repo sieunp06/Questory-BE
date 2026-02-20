@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .ignoringRequestMatchers(
                                 "/api/member/register",
+                                "/api/member/login",
                                 "/api/email/send-verify",
                                 "/api/email/verify-code"
                         )
@@ -52,7 +53,8 @@ public class SecurityConfig {
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers(
                                 "/docs/**",
-                                "/api/member/**",
+                                "/api/member/register",
+                                "/api/member/login",
                                 "/api/email/send-verify",
                                 "/api/email/verify-code"
                         ).permitAll()
