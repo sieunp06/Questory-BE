@@ -3,7 +3,7 @@ package com.ssafy.questory.member.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.questory.config.security.jwt.JwtAuthenticationEntryPoint;
 import com.ssafy.questory.config.security.jwt.JwtAuthenticationFilter;
-import com.ssafy.questory.member.dto.request.MemberRegisterRequestDto;
+import com.ssafy.questory.member.dto.request.RegisterRequestDto;
 import com.ssafy.questory.member.dto.response.MemberResponseDto;
 import com.ssafy.questory.member.service.MemberService;
 import org.junit.jupiter.api.DisplayName;
@@ -48,7 +48,7 @@ class MemberControllerTest {
     @Test
     @DisplayName("회원가입 성공 - 201 + REST Docs")
     void member_register_success() throws Exception {
-        MemberRegisterRequestDto request = new MemberRegisterRequestDto(
+        RegisterRequestDto request = new RegisterRequestDto(
                 "test@example.com",
                 "Aa1!aaaa",
                 "Aa1!aaaa",
@@ -61,7 +61,7 @@ class MemberControllerTest {
                 .nickname("테스터")
                 .build();
 
-        given(memberService.register(any(MemberRegisterRequestDto.class))).willReturn(response);
+        given(memberService.register(any(RegisterRequestDto.class))).willReturn(response);
 
         mockMvc.perform(post("/api/member/register")
                         .contentType(MediaType.APPLICATION_JSON)

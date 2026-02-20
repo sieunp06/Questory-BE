@@ -4,7 +4,7 @@ import com.ssafy.questory.common.exception.CustomException;
 import com.ssafy.questory.common.exception.ErrorCode;
 import com.ssafy.questory.member.domain.Member;
 import com.ssafy.questory.member.domain.MemberStatus;
-import com.ssafy.questory.member.dto.request.MemberRegisterRequestDto;
+import com.ssafy.questory.member.dto.request.RegisterRequestDto;
 import com.ssafy.questory.member.dto.response.MemberResponseDto;
 import com.ssafy.questory.member.repository.MemberPasswordCredentialsRepository;
 import com.ssafy.questory.member.repository.MemberRepository;
@@ -21,7 +21,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public MemberResponseDto register(MemberRegisterRequestDto memberRegistRequestDto) {
+    public MemberResponseDto register(RegisterRequestDto memberRegistRequestDto) {
         String email = memberRegistRequestDto.email();
         String password = memberRegistRequestDto.password();
         String passwordConfirm = memberRegistRequestDto.passwordConfirm();

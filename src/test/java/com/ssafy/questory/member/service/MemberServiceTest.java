@@ -4,7 +4,7 @@ import com.ssafy.questory.common.exception.CustomException;
 import com.ssafy.questory.common.exception.ErrorCode;
 import com.ssafy.questory.member.domain.Member;
 import com.ssafy.questory.member.domain.MemberStatus;
-import com.ssafy.questory.member.dto.request.MemberRegisterRequestDto;
+import com.ssafy.questory.member.dto.request.RegisterRequestDto;
 import com.ssafy.questory.member.dto.response.MemberResponseDto;
 import com.ssafy.questory.member.repository.MemberPasswordCredentialsRepository;
 import com.ssafy.questory.member.repository.MemberRepository;
@@ -36,7 +36,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("회원가입 성공: member 저장 + password 저장 + 응답 반환")
     void register_success() {
-        MemberRegisterRequestDto req = new MemberRegisterRequestDto(
+        RegisterRequestDto req = new RegisterRequestDto(
                 "test@example.com",
                 "Aa1!aaaa",
                 "Aa1!aaaa",
@@ -74,7 +74,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("회원가입 실패: 이미 존재하는 이메일(NORMAL) -> EMAIL_ALREADY_EXISTS")
     void register_fail_emailAlreadyExists() {
-        MemberRegisterRequestDto req = new MemberRegisterRequestDto(
+        RegisterRequestDto req = new RegisterRequestDto(
                 "test@example.com",
                 "Aa1!aaaa",
                 "Aa1!aaaa",
@@ -100,7 +100,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("회원가입 실패: 탈퇴 회원 이메일(SOFT_DELETE) -> MEMBER_DELETED")
     void register_fail_deletedMemberEmail() {
-        MemberRegisterRequestDto req = new MemberRegisterRequestDto(
+        RegisterRequestDto req = new RegisterRequestDto(
                 "test@example.com",
                 "Aa1!aaaa",
                 "Aa1!aaaa",
@@ -126,7 +126,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("회원가입 실패: 비밀번호 확인 불일치 -> PASSWORD_CONFIRM_MISMATCH (repo 호출 없음)")
     void register_fail_passwordConfirmMismatch() {
-        MemberRegisterRequestDto req = new MemberRegisterRequestDto(
+        RegisterRequestDto req = new RegisterRequestDto(
                 "test@example.com",
                 "Aa1!aaaa",
                 "Aa1!bbbb",
@@ -151,7 +151,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("회원가입 실패: 닉네임 중복 -> NICKNAME_ALREADY_EXISTS")
     void register_fail_nicknameAlreadyExists() {
-        MemberRegisterRequestDto req = new MemberRegisterRequestDto(
+        RegisterRequestDto req = new RegisterRequestDto(
                 "test@example.com",
                 "Aa1!aaaa",
                 "Aa1!aaaa",
