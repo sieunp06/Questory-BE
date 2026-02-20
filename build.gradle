@@ -68,7 +68,6 @@ dependencies {
 
 	// mail
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
-	testImplementation 'org.springframework.boot:spring-boot-starter-mail-test'
 }
 
 tasks.named('test') {
