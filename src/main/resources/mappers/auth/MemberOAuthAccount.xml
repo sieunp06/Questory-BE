@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.auth.repository.MemberOAuthAccountRepository">
+
+    <resultMap id="MemberOAuthAccountResultMap"
+               type="com.ssafy.questory.auth.domain.MemberOAuthAccount">
+        <id     property="memberOAuthAccountId" column="member_oauth_accounts_id"/>
+        <result property="memberId"             column="member_id"/>
+        <result property="provider"             column="provider"/>
+        <result property="providerMemberId"     column="provider_member_id"/>
+    </resultMap>
+
+    <insert id="insert"
+            parameterType="com.ssafy.questory.auth.domain.MemberOAuthAccount"
+            useGeneratedKeys="true"
+            keyProperty="memberOAuthAccountId"
+            keyColumn="member_oauth_accounts_id">
+        INSERT INTO member_oauth_accounts (member_id, provider, provider_member_id)
+        VALUES (#{memberId}, #{provider}, #{providerMemberId})
+    </insert>
+
+    <select id="findByProviderAndProviderMemberId" resultMap="MemberOAuthAccountResultMap">
+        SELECT member_oauth_accounts_id, member_id, provider, provider_member_id
+        FROM member_oauth_accounts
+        WHERE provider = #{provider}
+        AND provider_member_id = #{providerMemberId}
+        LIMIT 1
+    </select>
+</mapper>

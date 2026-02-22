@@ -1,9 +1,10 @@
 package com.ssafy.questory.security.config.jwt;
 
-import com.ssafy.questory.security.config.MemberAuthPolicy;
+import com.ssafy.questory.member.domain.MemberStatus;
 import com.ssafy.questory.member.domain.SecurityMember;
 import com.ssafy.questory.member.dto.security.LoginPrincipalRow;
 import com.ssafy.questory.member.repository.MemberRepository;
+import com.ssafy.questory.security.config.MemberAuthPolicy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,15 +22,11 @@ public class LoginUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email)
-            throws UsernameNotFoundException {
-
-        LoginPrincipalRow row = memberRepository.findLoginPrincipalByEmail(email)
+    public UserDetails loadUserByUsername(String email) {
+        LoginPrincipalRow row = memberRepository.findLoginPrincipalByEmailWithPassword(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        memberAuthPolicy.validateActive(row.status());
-
+        memberAuthPolicy.validateActive(MemberStatus.valueOf(row.status()));
         return SecurityMember.fromLogin(row);
     }
-
 }
