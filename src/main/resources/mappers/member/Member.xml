@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.member.repository.MemberRepository">
+    <select id="findByEmail" resultType="com.ssafy.questory.member.domain.Member">
+        SELECT member_id, email, nickname, status
+        FROM member
+        WHERE email = #{email}
+            AND status != 'SOFT_DELETE'
+    </select>
+    <select id="findLoginPrincipalByEmail"
+            resultType="com.ssafy.questory.member.dto.security.LoginPrincipalRow">
+        SELECT
+        m.member_id            AS memberId,
+        m.email                AS email,
+        m.nickname             AS nickname,
+        m.status               AS status,
+        p.password_hash        AS passwordHash,
+        p.failed_login_count   AS failedLoginCount,
+        p.locked_until         AS lockedUntil
+        FROM member m
+        JOIN member_password_credentials p
+        ON m.member_id = p.member_id
+        WHERE m.email = #{email}
+        AND m.status != 'SOFT_DELETE'
+    </select>
+    <select id="existsByNickname" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM member
+        WHERE nickname = #{nickname}
+    </select>
+    <insert id="register"
+            parameterType="com.ssafy.questory.member.domain.Member"
+            useGeneratedKeys="true" keyProperty="memberId">
+        INSERT INTO member (email, nickname, status, created_at, updated_at)
+        VALUES (#{email}, #{nickname}, #{status}, NOW(), NOW())
+    </insert>
+</mapper>

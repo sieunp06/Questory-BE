@@ -1,0 +1,49 @@
+= Questory API Documentation
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+:sectnums:
+
+== Member API
+
+=== 1. 회원가입
+
+==== 1-1. 회원가입 성공
+
+operation::member-register[snippets='http-request,http-response,request-fields,response-fields']
+
+==== 1-2. 회원가입 실패 (Validation)
+
+operation::member-register-400[snippets='http-request,http-response']
+
+
+=== 2. 로그인
+
+==== 2-1. 로그인 성공
+
+operation::member-login[snippets='http-request,http-response,request-fields,response-headers']
+
+==== 2-2. 로그인 실패 (Validation)
+
+operation::member-login-400[snippets='http-request,http-response']
+
+
+=== 3. Access Token 재발급
+
+==== 3-1. 재발급 성공
+
+operation::member-refresh[snippets='http-request,http-response,response-headers']
+
+==== 3-2. 재발급 실패 (refresh_token 없음)
+
+operation::member-refresh-401-no-cookie[snippets='http-request,http-response']
+
+
+=== 4. 로그아웃
+
+==== 4-1. 로그아웃 성공
+
+operation::member-logout[snippets='http-request,http-response,response-headers']

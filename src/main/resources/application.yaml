@@ -8,9 +8,28 @@ spring:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?serverTimezone=UTC
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  mail:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      timeout: 3000
 
 mybatis:
-  mapper-locations: classpath:/mapper/**/*.xml
+  mapper-locations: classpath:/mappers/**/*.xml
+  type-aliases-package: com.ssafy.questory
+  configuration:
+    map-underscore-to-camel-case: true
 
 logging:
   level:
@@ -18,3 +37,14 @@ logging:
       ssafy: TRACE
   pattern:
     console: "%d{HH:mm:ss} [%level] %c{36} %m%n"
+
+jwt:
+  access:
+    secret: ${JWT_ACCESS_SECRET}
+    expiration_time: 900000        # 15분 (ms)
+  refresh:
+    secret: ${JWT_REFRESH_SECRET}
+    expiration_time: 1209600000    # 14일 (ms)
+
+front:
+  url: ${FRONT_URL}
