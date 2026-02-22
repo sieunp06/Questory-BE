@@ -1,4 +1,4 @@
-package com.ssafy.questory.member.domain;
+package com.ssafy.questory.auth.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
