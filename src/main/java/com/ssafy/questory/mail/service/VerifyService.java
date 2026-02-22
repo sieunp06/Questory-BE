@@ -25,7 +25,6 @@ public class VerifyService implements MailContentBuilder {
         String verificationCode = generateVerificationCode();
 
         redisUtil.setDataExpire("VERIFICATION:CODE:" + email, verificationCode, 300L);
-        redisUtil.setDataExpire("VERIFICATION:TRY:" + email, "0", 300L);
         redisUtil.setDataExpire("VERIFICATION:COOLDOWN:" + email, "1", 60L);
 
         String title = "[Questory] 이메일 인증 코드 안내";
