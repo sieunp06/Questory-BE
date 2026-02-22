@@ -1,4 +1,4 @@
-package com.ssafy.questory.config;
+package com.ssafy.questory.common.config;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.context.annotation.Bean;
