@@ -34,16 +34,11 @@ CREATE TABLE member_password_credentials (
   COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE member_oauth_accounts (
-    member_identities_id BIGINT NOT NULL AUTO_INCREMENT,
+    member_oauth_accounts_id BIGINT NOT NULL AUTO_INCREMENT,
     member_id            BIGINT NOT NULL,
     provider             ENUM('KAKAO','GOOGLE','NAVER') NOT NULL,
     provider_member_id   VARCHAR(128) NOT NULL,
-    email_verified       TINYINT(1) NOT NULL DEFAULT 0,
-    linked_at            DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    access_token         TEXT NULL,
-    refresh_token        TEXT NULL,
-    token_expires_at     DATETIME NULL,
-    PRIMARY KEY (member_identities_id),
+    PRIMARY KEY (member_oauth_accounts_id),
     UNIQUE KEY uk_provider_provider_member (provider, provider_member_id),
     KEY idx_member_id (member_id),
 
