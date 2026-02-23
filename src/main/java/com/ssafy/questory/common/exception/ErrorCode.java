@@ -22,6 +22,11 @@ public enum ErrorCode {
     VERIFICATION_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "인증 코드가 일치하지 않습니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
 
+    // Social
+    SOCIAL_EMAIL_REQUIRED(HttpStatus.BAD_REQUEST, "이메일이 필요합니다."),
+    INVALID_TICKET(HttpStatus.BAD_REQUEST, "올바르지 않은 티켓입니다."),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
+
     // Email
     EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 전송에 실패했습니다."),
     INVALID_EMAIL_FORMAT(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),

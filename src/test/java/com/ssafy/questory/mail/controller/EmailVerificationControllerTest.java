@@ -6,18 +6,10 @@ import com.ssafy.questory.mail.dto.request.MemberEmailRequestDto;
 import com.ssafy.questory.mail.dto.response.MailResponseDto;
 import com.ssafy.questory.mail.service.MailSendService;
 import com.ssafy.questory.mail.service.VerifyService;
-import com.ssafy.questory.security.config.SecurityConfig;
-import com.ssafy.questory.security.config.jwt.JwtAuthenticationEntryPoint;
-import com.ssafy.questory.security.config.jwt.JwtAuthenticationFilter;
+import com.ssafy.questory.support.NoSecurityWebMvcTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,17 +24,7 @@ import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(
-        controllers = EmailVerificationController.class,
-        excludeAutoConfiguration = SecurityAutoConfiguration.class,
-        excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthenticationFilter.class),
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthenticationEntryPoint.class),
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class) // 네 프로젝트 SecurityConfig 클래스
-        }
-)
-@AutoConfigureMockMvc(addFilters = false)
-@AutoConfigureRestDocs(outputDir = "build/generated-snippets")
+@NoSecurityWebMvcTest(controllers = EmailVerificationController.class)
 class EmailVerificationControllerTest {
 
     @Autowired MockMvc mockMvc;

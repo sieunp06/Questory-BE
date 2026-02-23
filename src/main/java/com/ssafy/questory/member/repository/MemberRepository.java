@@ -8,8 +8,8 @@ import java.util.Optional;
 
 @Mapper
 public interface MemberRepository {
+    Optional<Member> findById(Long memberId);
     Optional<Member> findByEmail(String email);
-    Optional<LoginPrincipalRow> findLoginPrincipalByEmail(String email);
-    boolean existsByNickname(String nickname);
+    Optional<LoginPrincipalRow> findLoginPrincipalByEmailWithPassword(String email);
     int register(Member member);
 }

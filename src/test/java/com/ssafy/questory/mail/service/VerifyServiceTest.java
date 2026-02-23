@@ -36,7 +36,7 @@ class VerifyServiceTest {
     }
 
     @Test
-    void buildMail_whenNoCooldown_savesCodeTryCooldownAndReturnsMail() {
+    void buildMail_whenNoCooldown_savesCodeAndCooldownAndReturnsMail() {
         String email = "user@example.com";
         when(redisUtil.exists("VERIFICATION:COOLDOWN:" + email)).thenReturn(false);
 
@@ -54,8 +54,8 @@ class VerifyServiceTest {
         assertThat(verificationCode).matches("^[A-Z0-9]{6}$");
         assertThat(mail.content()).contains(verificationCode);
 
-        verify(redisUtil).setDataExpire("VERIFICATION:TRY:" + email, "0", 300L);
         verify(redisUtil).setDataExpire("VERIFICATION:COOLDOWN:" + email, "1", 60L);
+        verify(redisUtil, never()).setDataExpire(startsWith("VERIFICATION:TRY:"), anyString(), anyLong());
     }
 
     @Test

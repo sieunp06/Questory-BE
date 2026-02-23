@@ -3,13 +3,19 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.questory.member.repository.MemberRepository">
+    <select id="findById" parameterType="long" resultType="com.ssafy.questory.member.domain.Member">
+        SELECT member_id, email, nickname, status
+        FROM member
+        WHERE member_id = #{memberId}
+        AND status != 'SOFT_DELETE'
+    </select>
     <select id="findByEmail" resultType="com.ssafy.questory.member.domain.Member">
         SELECT member_id, email, nickname, status
         FROM member
         WHERE email = #{email}
             AND status != 'SOFT_DELETE'
     </select>
-    <select id="findLoginPrincipalByEmail"
+    <select id="findLoginPrincipalByEmailWithPassword"
             resultType="com.ssafy.questory.member.dto.security.LoginPrincipalRow">
         SELECT
         m.member_id            AS memberId,

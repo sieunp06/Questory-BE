@@ -1,11 +1,9 @@
-package com.ssafy.questory.member.domain;
+package com.ssafy.questory.auth.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -16,8 +14,4 @@ public class MemberOAuthAccount {
     private Long memberId;
     private AuthProvider provider;
     private String providerMemberId;
-    private Boolean emailVerified;
-    private String accessToken;
-    private String refreshToken;
-    private LocalDateTime tokenExpiresAt;
 }

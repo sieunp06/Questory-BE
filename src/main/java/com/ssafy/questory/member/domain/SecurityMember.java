@@ -14,7 +14,7 @@ public class SecurityMember implements UserDetails {
     private final String email;
     private final String nickname;
     private final String passwordHash;
-    private final String status;
+    private final MemberStatus status;
     private final Integer failedLoginCount;
     private final LocalDateTime lockedUntil;
 
@@ -23,7 +23,7 @@ public class SecurityMember implements UserDetails {
             String email,
             String nickname,
             String passwordHash,
-            String status,
+            MemberStatus status,
             Integer failedLoginCount,
             LocalDateTime lockedUntil
     ) {
@@ -42,9 +42,21 @@ public class SecurityMember implements UserDetails {
                 row.email(),
                 row.nickname(),
                 row.passwordHash(),
-                row.status(),
+                MemberStatus.valueOf(row.status()),
                 row.failedLoginCount(),
                 row.lockedUntil()
+        );
+    }
+
+    public static SecurityMember fromMember(Member member) {
+        return new SecurityMember(
+                member.getMemberId(),
+                member.getEmail(),
+                member.getNickname(),
+                "",
+                member.getStatus(),
+                0,
+                null
         );
     }
 

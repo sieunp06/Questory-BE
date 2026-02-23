@@ -8,12 +8,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class MemberAuthPolicy {
 
-    public void validateActive(String status) {
-        MemberStatus s = MemberStatus.valueOf(status);
-        if (s == MemberStatus.SOFT_DELETE) {
+    public void validateActive(MemberStatus status) {
+        if (status == MemberStatus.SOFT_DELETE) {
             throw new DisabledException("Member is deleted");
         }
-        if (s == MemberStatus.LOCKED) {
+        if (status == MemberStatus.LOCKED) {
             throw new LockedException("Member is locked");
         }
     }
