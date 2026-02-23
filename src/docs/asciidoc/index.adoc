@@ -7,6 +7,37 @@
 :sectlinks:
 :sectnums:
 
+== Auth API
+
+=== 1. Ticket Exchange
+
+==== 1-1. exchange 성공 (200)
+
+operation::auth-exchange[snippets='http-request,http-response,request-fields,response-headers,response-fields']
+
+==== 1-2. exchange 실패 (400 - Validation)
+
+operation::auth-exchange-400[snippets='http-request,http-response,request-fields']
+
+=== 2. OAuth2 Social Login
+
+==== 2-1. 소셜 로그인 요청 URL
+
+아래 URL로 접근하면 각 Provider 인증 페이지로 리다이렉트됩니다.
+
+- Kakao: `/oauth2/authorization/kakao`
+- Naver: `/oauth2/authorization/naver`
+- Google: `/oauth2/authorization/google`
+
+==== 2-2. OAuth2 Callback URL (Provider → Backend)
+
+각 Provider는 인증 완료 후 아래 엔드포인트로 콜백됩니다. (Spring Security 기본값)
+
+- Kakao: `/login/oauth2/code/kakao`
+- Naver: `/login/oauth2/code/naver`
+- Google: `/login/oauth2/code/google`
+
+
 == Member API
 
 === 1. 회원가입

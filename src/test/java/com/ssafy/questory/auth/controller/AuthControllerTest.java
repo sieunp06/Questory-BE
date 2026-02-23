@@ -65,7 +65,7 @@ class AuthControllerTest {
 
     @Test
     @DisplayName("exchange 실패 - 400 (ticket 공백) - @NotBlank 검증")
-    void exchange_400_blankTicket() throws Exception {
+    void exchange_400_blankTicket_restdocs() throws Exception {
         TicketExchangeRequestDto dto = new TicketExchangeRequestDto("   ");
 
         mockMvc.perform(
@@ -73,6 +73,20 @@ class AuthControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(dto))
                 )
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andDo(document("auth-exchange-400",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("ticket").description("1회용 티켓 (공백 불가)")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").description("HTTP 상태 코드"),
+                                fieldWithPath("message").description("에러 메시지"),
+                                fieldWithPath("errors").description("필드 검증 오류 목록"),
+                                fieldWithPath("errors[].field").description("오류가 발생한 필드명"),
+                                fieldWithPath("errors[].reason").description("오류 사유(Validation 메시지)")
+                        )
+                ));
     }
 }
