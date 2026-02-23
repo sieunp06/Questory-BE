@@ -27,11 +27,9 @@ class AuthServiceTest {
 
     @Test
     void exchangeTicket_success_returnsAccessToken() {
-        // given
         String ticket = "TICKET-123";
         String email = "user@example.com";
 
-        // TicketPayload이 record/class 무엇이든 상관없이 "email()"만 쓸 수 있게 스텁
         TicketPayload payload = mock(TicketPayload.class);
         when(payload.email()).thenReturn(email);
 
@@ -41,10 +39,8 @@ class AuthServiceTest {
         when(jwtUserDetailsService.loadUserByEmail(email)).thenReturn(userDetails);
         when(jwtService.generateAccessToken(userDetails)).thenReturn("access.token.value");
 
-        // when
         String accessToken = authService.exchangeTicket(ticket);
 
-        // then
         assertThat(accessToken).isEqualTo("access.token.value");
 
         verify(ticketStore).consume(ticket);
@@ -55,15 +51,12 @@ class AuthServiceTest {
 
     @Test
     void exchangeTicket_invalidTicket_throwsCustomException_andDoesNotCallJwt() {
-        // given
         String ticket = "INVALID";
         when(ticketStore.consume(ticket)).thenReturn(null);
 
-        // when & then
         assertThatThrownBy(() -> authService.exchangeTicket(ticket))
                 .isInstanceOf(CustomException.class);
 
-        // 핵심: payload가 null이면 이후 로직이 절대 돌면 안 됨
         verify(ticketStore).consume(ticket);
         verifyNoInteractions(jwtUserDetailsService, jwtService);
     }
