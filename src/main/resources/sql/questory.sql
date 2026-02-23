@@ -11,8 +11,7 @@ CREATE TABLE member (
     updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at  DATETIME NULL,
     PRIMARY KEY (member_id),
-    UNIQUE KEY uk_member_email (email),
-    UNIQUE KEY uk_member_nickname (nickname)
+    UNIQUE KEY uk_member_email (email)
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_0900_ai_ci;

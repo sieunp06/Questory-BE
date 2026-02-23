@@ -11,6 +11,5 @@ public interface MemberRepository {
     Optional<Member> findById(Long memberId);
     Optional<Member> findByEmail(String email);
     Optional<LoginPrincipalRow> findLoginPrincipalByEmailWithPassword(String email);
-    boolean existsByNickname(String nickname);
     int register(Member member);
 }

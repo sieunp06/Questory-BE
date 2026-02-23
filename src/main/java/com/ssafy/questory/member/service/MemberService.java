@@ -42,7 +42,6 @@ public class MemberService {
 
         validateNotExistMember(email);
         validatePassword(password, passwordConfirm);
-        validateNickname(nickname);
 
         Member member = Member.builder()
                 .email(email)
@@ -122,12 +121,6 @@ public class MemberService {
     private void validatePassword(String password, String passwordConfirm) {
         if (!password.equals(passwordConfirm)) {
             throw new CustomException(ErrorCode.PASSWORD_CONFIRM_MISMATCH);
-        }
-    }
-
-    private void validateNickname(String nickname) {
-        if (memberRepository.existsByNickname(nickname)) {
-            throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
         }
     }
 }
