@@ -15,6 +15,11 @@
         WHERE email = #{email}
             AND status != 'SOFT_DELETE'
     </select>
+    <select id="findStatusById" resultType="com.ssafy.questory.member.domain.MemberStatus">
+        SELECT status
+        FROM member
+        WHERE member_id = #{memberId}
+    </select>
     <select id="findLoginPrincipalByEmailWithPassword"
             resultType="com.ssafy.questory.member.dto.security.LoginPrincipalRow">
         SELECT
@@ -42,4 +47,10 @@
         INSERT INTO member (email, nickname, status, created_at, updated_at)
         VALUES (#{email}, #{nickname}, #{status}, NOW(), NOW())
     </insert>
+    <update id="softDeleteIfActive">
+        UPDATE member
+        SET status = 'SOFT_DELETE', updated_at = #{now}
+        WHERE member_id = #{memberId}
+            AND status = 'NORMAL'
+    </update>
 </mapper>

@@ -1,6 +1,7 @@
 package com.ssafy.questory.member.domain;
 
 import com.ssafy.questory.member.dto.security.LoginPrincipalRow;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -8,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-
+@Getter
 public class SecurityMember implements UserDetails {
     private final Long memberId;
     private final String email;

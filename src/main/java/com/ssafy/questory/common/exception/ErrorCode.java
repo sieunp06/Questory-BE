@@ -21,6 +21,7 @@ public enum ErrorCode {
     VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "인증 코드가 만료되었습니다."),
     VERIFICATION_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "인증 코드가 일치하지 않습니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
+    INVALID_MEMBER_STATUS(HttpStatus.BAD_REQUEST, "올바른 회원 상태가 아닙니다."),
 
     // Social
     SOCIAL_EMAIL_REQUIRED(HttpStatus.BAD_REQUEST, "이메일이 필요합니다."),
