@@ -7,13 +7,11 @@
         SELECT member_id, email, nickname, status
         FROM member
         WHERE member_id = #{memberId}
-        AND status != 'SOFT_DELETE'
     </select>
     <select id="findByEmail" resultType="com.ssafy.questory.member.domain.Member">
         SELECT member_id, email, nickname, status
         FROM member
         WHERE email = #{email}
-            AND status != 'SOFT_DELETE'
     </select>
     <select id="findStatusById" resultType="com.ssafy.questory.member.domain.MemberStatus">
         SELECT status
@@ -52,5 +50,16 @@
         SET status = 'SOFT_DELETE', updated_at = #{now}
         WHERE member_id = #{memberId}
             AND status = 'NORMAL'
+    </update>
+
+    <update id="changeStatusLocked">
+        UPDATE member
+        SET status = 'LOCKED'
+        WHERE email = #{email}
+    </update>
+    <update id="changeStatusNormal">
+        UPDATE member
+        SET status = 'NORMAL'
+        WHERE email = #{email}
     </update>
 </mapper>

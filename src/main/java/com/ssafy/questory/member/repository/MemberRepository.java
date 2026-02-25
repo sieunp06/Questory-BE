@@ -16,4 +16,7 @@ public interface MemberRepository {
     Optional<LoginPrincipalRow> findLoginPrincipalByEmailWithPassword(String email);
     int register(Member member);
     int softDeleteIfActive(Long memberId, LocalDateTime now);
+
+    void changeStatusLocked(String email);
+    void changeStatusNormal(String email);
 }
