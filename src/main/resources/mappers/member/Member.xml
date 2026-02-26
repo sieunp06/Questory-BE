@@ -34,11 +34,25 @@
         WHERE m.email = #{email}
         AND m.status != 'SOFT_DELETE'
     </select>
-    <select id="existsByNickname" resultType="boolean">
-        SELECT COUNT(*) > 0
-        FROM member
-        WHERE nickname = #{nickname}
+    <select id="findMyInfo" parameterType="long"
+            resultType="com.ssafy.questory.member.dto.response.MemberInfoResponseDto">
+        SELECT m.email, m.nickname, m.total_exp AS total_exp, t.name AS representative_title
+        FROM member m
+        LEFT JOIN title t ON m.representative_title_id = t.title_id
+        WHERE m.member_id = #{memberId}
+            AND m.status != 'SOFT_DELETE'
     </select>
+
+    <select id="searchByEmail" resultType="com.ssafy.questory.member.dto.response.MemberInfoResponseDto">
+        SELECT m.email, m.nickname, m.total_exp AS total_exp, t.name AS representative_title
+        FROM member m
+        LEFT JOIN title t ON m.representative_title_id = t.title_id
+        WHERE m.email LIKE CONCAT('%', #{email}, '%')
+            AND m.member_id != #{myMemberId}
+            AND m.status != 'SOFT_DELETE'
+        ORDER BY m.email
+    </select>
+
     <insert id="register"
             parameterType="com.ssafy.questory.member.domain.Member"
             useGeneratedKeys="true" keyProperty="memberId">
