@@ -11,7 +11,7 @@ public class Member {
     private String email;
     private String nickname;
     private Long totalExp;
-    private String representativeTitleId;
+    private Long representativeTitleId;
     private MemberStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

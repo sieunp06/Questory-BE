@@ -76,4 +76,10 @@
         SET status = 'NORMAL'
         WHERE email = #{email}
     </update>
+
+    <update id="updateRepresentativeTitle">
+        UPDATE member
+        SET representative_title_id = #{titleId}
+        WHERE member_id = #{memberId}
+    </update>
 </mapper>

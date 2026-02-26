@@ -33,7 +33,12 @@ public enum ErrorCode {
     INVALID_EMAIL_FORMAT(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),
 
     // Email - Verification
-    VERIFICATION_COOLDOWN(HttpStatus.TOO_MANY_REQUESTS, "잠시 후 다시 요청해주세요.");
+    VERIFICATION_COOLDOWN(HttpStatus.TOO_MANY_REQUESTS, "잠시 후 다시 요청해주세요."),
+
+    // Title
+    MEMBER_TITLE_NOT_OWNED(HttpStatus.BAD_REQUEST, "보유하지 않은 칭호입니다."),
+    TITLE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 칭호입니다."),
+    MEMBER_TITLE_ALREADY_OWNED(HttpStatus.CONFLICT, "이미 보유한 칭호입니다.");
 
     private final HttpStatus status;
     private final String message;

@@ -25,4 +25,6 @@ public interface MemberRepository {
     int softDeleteIfActive(Long memberId, LocalDateTime now);
     void changeStatusLocked(String email);
     void changeStatusNormal(String email);
+
+    int updateRepresentativeTitle(Long memberId, Long titleId);
 }
