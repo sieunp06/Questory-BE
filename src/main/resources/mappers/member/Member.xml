@@ -7,13 +7,16 @@
         SELECT member_id, email, nickname, status
         FROM member
         WHERE member_id = #{memberId}
-        AND status != 'SOFT_DELETE'
     </select>
     <select id="findByEmail" resultType="com.ssafy.questory.member.domain.Member">
         SELECT member_id, email, nickname, status
         FROM member
         WHERE email = #{email}
-            AND status != 'SOFT_DELETE'
+    </select>
+    <select id="findStatusById" resultType="com.ssafy.questory.member.domain.MemberStatus">
+        SELECT status
+        FROM member
+        WHERE member_id = #{memberId}
     </select>
     <select id="findLoginPrincipalByEmailWithPassword"
             resultType="com.ssafy.questory.member.dto.security.LoginPrincipalRow">
@@ -31,15 +34,52 @@
         WHERE m.email = #{email}
         AND m.status != 'SOFT_DELETE'
     </select>
-    <select id="existsByNickname" resultType="boolean">
-        SELECT COUNT(*) > 0
-        FROM member
-        WHERE nickname = #{nickname}
+    <select id="findMyInfo" parameterType="long"
+            resultType="com.ssafy.questory.member.dto.response.MemberInfoResponseDto">
+        SELECT m.email, m.nickname, m.total_exp AS total_exp, t.name AS representative_title
+        FROM member m
+        LEFT JOIN title t ON m.representative_title_id = t.title_id
+        WHERE m.member_id = #{memberId}
+            AND m.status != 'SOFT_DELETE'
     </select>
+
+    <select id="searchByEmail" resultType="com.ssafy.questory.member.dto.response.MemberInfoResponseDto">
+        SELECT m.email, m.nickname, m.total_exp AS total_exp, t.name AS representative_title
+        FROM member m
+        LEFT JOIN title t ON m.representative_title_id = t.title_id
+        WHERE m.email LIKE CONCAT('%', #{email}, '%')
+            AND m.member_id != #{myMemberId}
+            AND m.status != 'SOFT_DELETE'
+        ORDER BY m.email
+    </select>
+
     <insert id="register"
             parameterType="com.ssafy.questory.member.domain.Member"
             useGeneratedKeys="true" keyProperty="memberId">
         INSERT INTO member (email, nickname, status, created_at, updated_at)
         VALUES (#{email}, #{nickname}, #{status}, NOW(), NOW())
     </insert>
+    <update id="softDeleteIfActive">
+        UPDATE member
+        SET status = 'SOFT_DELETE', updated_at = #{now}
+        WHERE member_id = #{memberId}
+            AND status = 'NORMAL'
+    </update>
+
+    <update id="changeStatusLocked">
+        UPDATE member
+        SET status = 'LOCKED'
+        WHERE email = #{email}
+    </update>
+    <update id="changeStatusNormal">
+        UPDATE member
+        SET status = 'NORMAL'
+        WHERE email = #{email}
+    </update>
+
+    <update id="updateRepresentativeTitle">
+        UPDATE member
+        SET representative_title_id = #{titleId}
+        WHERE member_id = #{memberId}
+    </update>
 </mapper>

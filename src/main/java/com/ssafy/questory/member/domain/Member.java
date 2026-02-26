@@ -10,6 +10,8 @@ public class Member {
     private Long memberId;
     private String email;
     private String nickname;
+    private Long totalExp;
+    private Long representativeTitleId;
     private MemberStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

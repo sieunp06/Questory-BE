@@ -26,6 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -37,6 +38,7 @@ class MemberServiceTest {
 
     @Mock MemberRepository memberRepository;
     @Mock MemberPasswordCredentialsRepository memberPasswordRepository;
+    @Mock LoginFailureService loginFailureService;
     @Mock PasswordEncoder passwordEncoder;
 
     @Mock AuthenticationManager authenticationManager;
@@ -184,7 +186,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("로그인 성공: authenticate + 토큰 발급 + TokenResponseDto 반환")
+    @DisplayName("로그인 성공: authenticate + 실패횟수 초기화 + 토큰 발급 + TokenResponseDto 반환")
     void login_success() {
         LoginRequestDto req = new LoginRequestDto("test@example.com", "Aa1!aaaa");
 
@@ -209,9 +211,12 @@ class MemberServiceTest {
 
         then(authenticationManager).should(times(1))
                 .authenticate(any(UsernamePasswordAuthenticationToken.class));
+        then(memberPasswordRepository).should(times(1)).resetFailedLoginCount("test@example.com");
         then(userDetailsService).should(times(1)).loadUserByUsername("test@example.com");
         then(jwtService).should(times(1)).generateAccessToken(userDetails);
         then(jwtService).should(times(1)).generateRefreshToken(userDetails);
+
+        then(loginFailureService).shouldHaveNoInteractions(); // 성공이면 실패 서비스 호출 없어야 함
     }
 
     @Test
@@ -229,6 +234,8 @@ class MemberServiceTest {
         then(authenticationManager).shouldHaveNoInteractions();
         then(userDetailsService).shouldHaveNoInteractions();
         then(jwtService).shouldHaveNoInteractions();
+        then(memberPasswordRepository).should(never()).resetFailedLoginCount(anyString());
+        then(loginFailureService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -248,16 +255,21 @@ class MemberServiceTest {
         then(authenticationManager).shouldHaveNoInteractions();
         then(userDetailsService).shouldHaveNoInteractions();
         then(jwtService).shouldHaveNoInteractions();
+        then(memberPasswordRepository).should(never()).resetFailedLoginCount(anyString());
+        then(loginFailureService).shouldHaveNoInteractions();
     }
 
     @Test
-    @DisplayName("로그인 실패: 잠김 회원 -> MEMBER_LOCKED (authenticate 호출 안 함)")
-    void login_fail_lockedMember() {
+    @DisplayName("로그인 실패: LOCKED + lockedUntil 미래 -> MEMBER_LOCKED (authenticate 호출 안 함)")
+    void login_fail_lockedMember_whenLockedUntilInFuture() {
         LoginRequestDto req = new LoginRequestDto("test@example.com", "Aa1!aaaa");
 
         Member member = mock(Member.class);
         given(member.getStatus()).willReturn(MemberStatus.LOCKED);
         given(memberRepository.findByEmail("test@example.com")).willReturn(Optional.of(member));
+
+        given(memberPasswordRepository.findLockedUntilByEmail("test@example.com"))
+                .willReturn(Optional.of(LocalDateTime.now().plusMinutes(10)));
 
         assertThatThrownBy(() -> memberService.login(req))
                 .isInstanceOf(CustomException.class)
@@ -267,10 +279,41 @@ class MemberServiceTest {
         then(authenticationManager).shouldHaveNoInteractions();
         then(userDetailsService).shouldHaveNoInteractions();
         then(jwtService).shouldHaveNoInteractions();
+        then(memberPasswordRepository).should(never()).resetFailedLoginCount(anyString());
+        then(loginFailureService).should(never()).unlockAccount(anyString());
     }
 
     @Test
-    @DisplayName("로그인 실패: 비밀번호 불일치 -> INVALID_PASSWORD")
+    @DisplayName("로그인 성공: LOCKED지만 lockedUntil 만료 -> unlockAccount 후 로그인 진행")
+    void login_success_lockedButExpired_autoUnlock() {
+        LoginRequestDto req = new LoginRequestDto("test@example.com", "Aa1!aaaa");
+
+        Member member = mock(Member.class);
+        given(member.getStatus()).willReturn(MemberStatus.LOCKED);
+        given(memberRepository.findByEmail("test@example.com")).willReturn(Optional.of(member));
+
+        given(memberPasswordRepository.findLockedUntilByEmail("test@example.com"))
+                .willReturn(Optional.of(LocalDateTime.now().minusMinutes(1)));
+
+        willReturn(null).given(authenticationManager)
+                .authenticate(any(UsernamePasswordAuthenticationToken.class));
+
+        UserDetails userDetails = mock(UserDetails.class);
+        given(userDetailsService.loadUserByUsername("test@example.com")).willReturn(userDetails);
+
+        given(jwtService.generateAccessToken(userDetails)).willReturn("ACCESS");
+        given(jwtService.generateRefreshToken(userDetails)).willReturn("REFRESH");
+
+        TokenResponseDto res = memberService.login(req);
+
+        assertThat(res.accessToken()).isEqualTo("ACCESS");
+
+        then(loginFailureService).should(times(1)).unlockAccount("test@example.com");
+        then(memberPasswordRepository).should(times(1)).resetFailedLoginCount("test@example.com");
+    }
+
+    @Test
+    @DisplayName("로그인 실패: 비밀번호 불일치 + 실패횟수 1회 -> INVALID_PASSWORD")
     void login_fail_invalidPassword() {
         LoginRequestDto req = new LoginRequestDto("test@example.com", "wrong");
 
@@ -282,13 +325,51 @@ class MemberServiceTest {
                 .given(authenticationManager)
                 .authenticate(any(UsernamePasswordAuthenticationToken.class));
 
+        given(loginFailureService.updateFailedCount(eq("test@example.com"), any(LocalDateTime.class)))
+                .willReturn(1);
+
         assertThatThrownBy(() -> memberService.login(req))
                 .isInstanceOf(CustomException.class)
                 .satisfies(ex -> assertThat(((CustomException) ex).getErrorCode())
                         .isEqualTo(ErrorCode.INVALID_PASSWORD));
 
+        then(loginFailureService).should(times(1))
+                .updateFailedCount(eq("test@example.com"), any(LocalDateTime.class));
+        then(loginFailureService).should(never()).lockAccount(anyString());
+
         then(userDetailsService).shouldHaveNoInteractions();
         then(jwtService).shouldHaveNoInteractions();
+        then(memberPasswordRepository).should(never()).resetFailedLoginCount(anyString());
+    }
+
+    @Test
+    @DisplayName("로그인 실패: 비밀번호 불일치 + 실패횟수 5회 도달 -> lockAccount + MEMBER_LOCKED")
+    void login_fail_invalidPassword_reachMax_thenLocked() {
+        LoginRequestDto req = new LoginRequestDto("test@example.com", "wrong");
+
+        Member member = mock(Member.class);
+        given(member.getStatus()).willReturn(MemberStatus.NORMAL);
+        given(memberRepository.findByEmail("test@example.com")).willReturn(Optional.of(member));
+
+        willThrow(new BadCredentialsException("bad"))
+                .given(authenticationManager)
+                .authenticate(any(UsernamePasswordAuthenticationToken.class));
+
+        given(loginFailureService.updateFailedCount(eq("test@example.com"), any(LocalDateTime.class)))
+                .willReturn(5);
+
+        assertThatThrownBy(() -> memberService.login(req))
+                .isInstanceOf(CustomException.class)
+                .satisfies(ex -> assertThat(((CustomException) ex).getErrorCode())
+                        .isEqualTo(ErrorCode.MEMBER_LOCKED));
+
+        then(loginFailureService).should(times(1))
+                .updateFailedCount(eq("test@example.com"), any(LocalDateTime.class));
+        then(loginFailureService).should(times(1)).lockAccount("test@example.com");
+
+        then(memberPasswordRepository).should(never()).resetFailedLoginCount(anyString());
+        then(jwtService).shouldHaveNoInteractions();
+        then(userDetailsService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -311,10 +392,12 @@ class MemberServiceTest {
 
         then(userDetailsService).shouldHaveNoInteractions();
         then(jwtService).shouldHaveNoInteractions();
+        then(memberPasswordRepository).should(never()).resetFailedLoginCount(anyString());
+        then(loginFailureService).shouldHaveNoInteractions();
     }
 
     @Test
-    @DisplayName("refresh 성공: refreshToken에서 email 추출 + accessToken 재발급")
+    @DisplayName("refresh 성공: refreshToken에서 email 추출 + (LOCK 자동해제 포함) accessToken 재발급")
     void refresh_success() {
         given(jwtService.extractUsername("REFRESH_TOKEN", JwtService.TokenType.REFRESH))
                 .willReturn("test@example.com");
@@ -336,6 +419,8 @@ class MemberServiceTest {
                 .extractUsername("REFRESH_TOKEN", JwtService.TokenType.REFRESH);
         then(userDetailsService).should(times(1)).loadUserByUsername("test@example.com");
         then(jwtService).should(times(1)).generateAccessToken(userDetails);
+
+        then(loginFailureService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -352,6 +437,7 @@ class MemberServiceTest {
 
         then(userDetailsService).shouldHaveNoInteractions();
         then(jwtService).should(never()).generateAccessToken(any());
+        then(loginFailureService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -371,17 +457,21 @@ class MemberServiceTest {
 
         then(userDetailsService).shouldHaveNoInteractions();
         then(jwtService).should(never()).generateAccessToken(any());
+        then(loginFailureService).shouldHaveNoInteractions();
     }
 
     @Test
-    @DisplayName("refresh 실패: 잠김 회원 -> MEMBER_LOCKED")
-    void refresh_fail_locked() {
+    @DisplayName("refresh 실패: LOCKED + lockedUntil 미래 -> MEMBER_LOCKED")
+    void refresh_fail_locked_whenLockedUntilInFuture() {
         given(jwtService.extractUsername("REFRESH_TOKEN", JwtService.TokenType.REFRESH))
                 .willReturn("test@example.com");
 
         Member member = mock(Member.class);
         given(member.getStatus()).willReturn(MemberStatus.LOCKED);
         given(memberRepository.findByEmail("test@example.com")).willReturn(Optional.of(member));
+
+        given(memberPasswordRepository.findLockedUntilByEmail("test@example.com"))
+                .willReturn(Optional.of(LocalDateTime.now().plusMinutes(10)));
 
         assertThatThrownBy(() -> memberService.refresh("REFRESH_TOKEN"))
                 .isInstanceOf(CustomException.class)
@@ -390,5 +480,29 @@ class MemberServiceTest {
 
         then(userDetailsService).shouldHaveNoInteractions();
         then(jwtService).should(never()).generateAccessToken(any());
+        then(loginFailureService).should(never()).unlockAccount(anyString());
+    }
+
+    @Test
+    @DisplayName("refresh 성공: LOCKED지만 lockedUntil 만료 -> unlockAccount 후 accessToken 재발급")
+    void refresh_success_lockedButExpired_autoUnlock() {
+        given(jwtService.extractUsername("REFRESH_TOKEN", JwtService.TokenType.REFRESH))
+                .willReturn("test@example.com");
+
+        Member member = mock(Member.class);
+        given(member.getStatus()).willReturn(MemberStatus.LOCKED);
+        given(memberRepository.findByEmail("test@example.com")).willReturn(Optional.of(member));
+
+        given(memberPasswordRepository.findLockedUntilByEmail("test@example.com"))
+                .willReturn(Optional.of(LocalDateTime.now().minusMinutes(1)));
+
+        UserDetails userDetails = mock(UserDetails.class);
+        given(userDetailsService.loadUserByUsername("test@example.com")).willReturn(userDetails);
+        given(jwtService.generateAccessToken(userDetails)).willReturn("NEW_ACCESS");
+
+        String access = memberService.refresh("REFRESH_TOKEN");
+
+        assertThat(access).isEqualTo("NEW_ACCESS");
+        then(loginFailureService).should(times(1)).unlockAccount("test@example.com");
     }
 }

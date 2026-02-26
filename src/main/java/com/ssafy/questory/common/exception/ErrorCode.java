@@ -21,6 +21,7 @@ public enum ErrorCode {
     VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "인증 코드가 만료되었습니다."),
     VERIFICATION_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "인증 코드가 일치하지 않습니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
+    INVALID_MEMBER_STATUS(HttpStatus.BAD_REQUEST, "올바른 회원 상태가 아닙니다."),
 
     // Social
     SOCIAL_EMAIL_REQUIRED(HttpStatus.BAD_REQUEST, "이메일이 필요합니다."),
@@ -32,7 +33,12 @@ public enum ErrorCode {
     INVALID_EMAIL_FORMAT(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),
 
     // Email - Verification
-    VERIFICATION_COOLDOWN(HttpStatus.TOO_MANY_REQUESTS, "잠시 후 다시 요청해주세요.");
+    VERIFICATION_COOLDOWN(HttpStatus.TOO_MANY_REQUESTS, "잠시 후 다시 요청해주세요."),
+
+    // Title
+    MEMBER_TITLE_NOT_OWNED(HttpStatus.BAD_REQUEST, "보유하지 않은 칭호입니다."),
+    TITLE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 칭호입니다."),
+    MEMBER_TITLE_ALREADY_OWNED(HttpStatus.CONFLICT, "이미 보유한 칭호입니다.");
 
     private final HttpStatus status;
     private final String message;

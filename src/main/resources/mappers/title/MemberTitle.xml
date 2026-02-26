@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.title.repository.MemberTitleRepository">
+    <select id="findOwnedTitles" resultType="com.ssafy.questory.title.dto.response.TitleResponseDto">
+        SELECT
+        t.title_id AS titleId,
+        t.name     AS name,
+        mt.acquired_at AS acquiredAt,
+        CASE WHEN m.representative_title_id = t.title_id THEN TRUE ELSE FALSE END AS representative
+        FROM member_title mt
+        JOIN title t ON t.title_id = mt.title_id
+        JOIN member m ON m.member_id = mt.member_id
+        WHERE mt.member_id = #{memberId}
+        ORDER BY mt.acquired_at DESC
+    </select>
+    <select id="existsByMemberIdAndTitleId" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM member_title
+            WHERE member_id = #{memberId}
+            AND title_id = #{titleId}
+        )
+    </select>
+    <insert id="insertMemberTitle">
+        INSERT INTO member_title (member_id, title_id, acquired_at)
+        VALUES (#{memberId}, #{titleId}, NOW())
+    </insert>
+</mapper>
