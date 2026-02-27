@@ -36,6 +36,19 @@
             AND r.status != 'SOFT_DELETE'
         ORDER BY fr.created_at DESC
     </select>
+    <select id="findPendingByIdAndSenderId"
+            resultType="com.ssafy.questory.friend.domain.FriendRequest">
+        SELECT  friend_request_id AS friendRequestId,
+        sender_id         AS senderId,
+        receiver_id       AS receiverId,
+        status            AS status,
+        created_at        AS createdAt,
+        responded_at      AS respondedAt
+        FROM friend_request
+        WHERE friend_request_id = #{friendRequestId}
+        AND sender_id = #{senderId}
+        AND status = 'PENDING'
+    </select>
 
     <resultMap id="MemberResponseDtoMap"
                type="com.ssafy.questory.member.dto.response.MemberResponseDto">
@@ -95,7 +108,8 @@
 
     <update id="updateStatus">
         UPDATE friend_request
-        SET status = #{status}
+        SET status = #{status},
+        responded_at = NOW()
         WHERE friend_request_id = #{friendRequestId}
     </update>
 </mapper>

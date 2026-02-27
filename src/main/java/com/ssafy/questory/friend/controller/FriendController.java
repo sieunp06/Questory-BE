@@ -55,4 +55,13 @@ public class FriendController {
         friendService.rejectRequest(member, friendRequestId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("친구 요청을 거절했습니다."));
     }
+
+    @PostMapping("/request/{friendRequestId}/cancel")
+    public ResponseEntity<ApiResponse<Void>> cancel(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long friendRequestId
+    ) {
+        friendService.cancelRequest(member, friendRequestId);
+        return ResponseEntity.ok(ApiResponse.ok("친구 요청을 취소했습니다."));
+    }
 }

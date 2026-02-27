@@ -13,6 +13,7 @@ public interface FriendRequestRepository {
     List<FriendRequestResponseDto> findRequestsByMemberId(Long memberId);
     List<FriendRequestResponseDto> findSentRequestsByMemberId(Long memberId);
 
+    Optional<FriendRequest> findPendingByIdAndSenderId(Long friendRequestId, Long senderId);
     Optional<FriendRequest> findPendingByIdAndReceiverId(Long friendRequestId, Long receiverId);
 
     boolean existsPendingRequestBetween(Long senderId, Long receiverId);

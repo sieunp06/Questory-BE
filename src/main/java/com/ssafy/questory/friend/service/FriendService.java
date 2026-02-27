@@ -102,4 +102,14 @@ public class FriendService {
 
         friendRequestRepository.updateStatus(friendRequestId, FriendStatus.REJECTED);
     }
+
+    @Transactional
+    public void cancelRequest(SecurityMember member, Long friendRequestId) {
+        Long senderId = member.getMemberId();
+
+        friendRequestRepository.findPendingByIdAndSenderId(friendRequestId, senderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
+
+        friendRequestRepository.updateStatus(friendRequestId, FriendStatus.CANCELED);
+    }
 }
