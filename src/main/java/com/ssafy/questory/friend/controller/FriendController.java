@@ -1,6 +1,7 @@
 package com.ssafy.questory.friend.controller;
 
 import com.ssafy.questory.common.api.ApiResponse;
+import com.ssafy.questory.friend.dto.FriendListResponseDto;
 import com.ssafy.questory.friend.dto.FriendRequestResponseDto;
 import com.ssafy.questory.friend.service.FriendService;
 import com.ssafy.questory.mail.dto.request.MemberEmailRequestDto;
@@ -19,6 +20,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FriendController {
     private final FriendService friendService;
+
+    @GetMapping
+    public ResponseEntity<List<FriendListResponseDto>> getFriends(
+            @AuthenticationPrincipal SecurityMember member) {
+        return ResponseEntity.ok(friendService.getFriends(member));
+    }
 
     @GetMapping("/request")
     public ResponseEntity<List<FriendRequestResponseDto>> getFriendRequestInfo(

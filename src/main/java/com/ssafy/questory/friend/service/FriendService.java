@@ -4,6 +4,9 @@ import com.ssafy.questory.common.exception.CustomException;
 import com.ssafy.questory.common.exception.ErrorCode;
 import com.ssafy.questory.friend.domain.FriendRequest;
 import com.ssafy.questory.friend.domain.FriendStatus;
+import com.ssafy.questory.friend.dto.FriendInfoDto;
+import com.ssafy.questory.friend.dto.FriendListRawDto;
+import com.ssafy.questory.friend.dto.FriendListResponseDto;
 import com.ssafy.questory.friend.dto.FriendRequestResponseDto;
 import com.ssafy.questory.friend.repository.FriendRepository;
 import com.ssafy.questory.friend.repository.FriendRequestRepository;
@@ -26,6 +29,32 @@ public class FriendService {
     private final FriendRepository friendRepository;
     private final FriendRequestRepository friendRequestRepository;
     private final MemberRepository memberRepository;
+
+    public List<FriendListResponseDto> getFriends(SecurityMember securityMember) {
+        Long memberId = securityMember.getMemberId();
+
+        List<FriendListRawDto> rawList =
+                friendRepository.findFriendsRawByMemberId(memberId);
+
+        return rawList.stream()
+                .map(raw -> new FriendListResponseDto(
+                        raw.friendId(),
+                        new FriendInfoDto(
+                                raw.memberId(),
+                                raw.email(),
+                                raw.nickname(),
+                                raw.representativeTitle(),
+                                calculateLevel(raw.totalExp())
+                        ),
+                        raw.friendSince()
+                ))
+                .toList();
+    }
+
+    private int calculateLevel(Long totalExp) {
+        if (totalExp == null) return 1;
+        return (int) (totalExp / 1000L) + 1;
+    }
 
     public List<FriendRequestResponseDto> getFriendRequests(SecurityMember member) {
         Long memberId = member.getMemberId();
