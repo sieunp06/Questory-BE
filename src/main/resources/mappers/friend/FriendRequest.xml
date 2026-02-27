@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.friend.repository.FriendRequestRepository">
+    <resultMap id="MemberResponseDtoMap"
+               type="com.ssafy.questory.member.dto.response.MemberResponseDto">
+        <constructor>
+            <arg column="member_id" javaType="java.lang.Long"/>
+            <arg column="email"     javaType="java.lang.String"/>
+            <arg column="nickname"  javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="FriendRequestResponseMap"
+               type="com.ssafy.questory.friend.dto.FriendRequestResponseDto">
+        <constructor>
+            <arg javaType="com.ssafy.questory.member.dto.response.MemberResponseDto"
+                 resultMap="MemberResponseDtoMap"/>
+            <arg column="status"
+                 javaType="com.ssafy.questory.friend.domain.FriendStatus"/>
+        </constructor>
+    </resultMap>
+
+    <select id="existsPendingRequestBetween" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM friend_request
+            WHERE (
+                (sender_id = #{senderId} AND receiver_id = #{receiverId})
+                OR
+                (sender_id = #{receiverId} AND receiver_id = #{senderId})
+            )
+            AND status = 'PENDING'
+        )
+    </select>
+
+    <insert id="request"
+            parameterType="com.ssafy.questory.friend.domain.FriendRequest"
+            useGeneratedKeys="true" keyProperty="friendRequestId">
+        INSERT INTO FRIEND_REQUEST (sender_id, receiver_id, status, created_at)
+        VALUES (#{senderId}, #{receiverId}, #{status}, #{createdAt})
+    </insert>
+</mapper>
