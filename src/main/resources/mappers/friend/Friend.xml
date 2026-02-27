@@ -58,4 +58,11 @@
             NOW()
         )
     </insert>
+
+    <delete id="deleteByFriendIdAndMemberId">
+        DELETE FROM friend
+        WHERE friend_id = #{friendId}
+            AND (member_a_id = #{memberId} OR member_b_id = #{memberId})
+            AND member_a_id != member_b_id
+    </delete>
 </mapper>

@@ -15,6 +15,7 @@ import com.ssafy.questory.member.domain.Member;
 import com.ssafy.questory.member.domain.MemberStatus;
 import com.ssafy.questory.member.domain.SecurityMember;
 import com.ssafy.questory.member.repository.MemberRepository;
+import com.ssafy.questory.security.config.MemberAuthPolicy;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class FriendService {
     private final FriendRepository friendRepository;
     private final FriendRequestRepository friendRequestRepository;
     private final MemberRepository memberRepository;
+    private final MemberAuthPolicy memberAuthPolicy;
 
     public List<FriendListResponseDto> getFriends(SecurityMember securityMember) {
         Long memberId = securityMember.getMemberId();
@@ -54,6 +56,21 @@ public class FriendService {
     private int calculateLevel(Long totalExp) {
         if (totalExp == null) return 1;
         return (int) (totalExp / 1000L) + 1;
+    }
+
+    @Transactional
+    public void deleteFriend(SecurityMember securityMember, Long friendId) {
+        Long memberId = securityMember.getMemberId();
+
+        Member me = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        memberAuthPolicy.validateActive(me.getStatus());
+
+        int deleted = friendRepository.deleteByFriendIdAndMemberId(friendId, memberId);
+
+        if (deleted == 0) {
+            throw new CustomException(ErrorCode.FRIEND_NOT_FOUND);
+        }
     }
 
     public List<FriendRequestResponseDto> getFriendRequests(SecurityMember member) {

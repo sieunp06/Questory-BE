@@ -43,7 +43,8 @@ public enum ErrorCode {
     // Friend
     ALREADY_FRIEND(HttpStatus.BAD_REQUEST, "이미 친구입니다."),
     DUPLICATE_REQUEST(HttpStatus.CONFLICT, "중복된 친구 요청입니다."),
-    FRIEND_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "친구 요청이 존재하지 않습니다.");
+    FRIEND_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "친구 요청이 존재하지 않습니다."),
+    FRIEND_NOT_FOUND(HttpStatus.BAD_REQUEST, "친구가 아닙니다.");
 
     private final HttpStatus status;
     private final String message;

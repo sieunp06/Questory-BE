@@ -27,6 +27,14 @@ public class FriendController {
         return ResponseEntity.ok(friendService.getFriends(member));
     }
 
+    @DeleteMapping("/{friendId}")
+    public ResponseEntity<ApiResponse<Void>> deleteFriend(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long friendId) {
+        friendService.deleteFriend(member, friendId);
+        return ResponseEntity.ok(ApiResponse.ok("친구가 삭제되었습니다."));
+    }
+
     @GetMapping("/request")
     public ResponseEntity<List<FriendRequestResponseDto>> getFriendRequestInfo(
             @AuthenticationPrincipal SecurityMember member) {

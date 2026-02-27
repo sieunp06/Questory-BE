@@ -12,4 +12,6 @@ public interface FriendRepository {
     boolean existsFriend(Long senderId, Long receiverId);
 
     void insertFriend(Long senderId, Long receiverId);
+
+    int deleteByFriendIdAndMemberId(Long friendId, Long memberId);
 }
