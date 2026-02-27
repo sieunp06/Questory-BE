@@ -11,4 +11,12 @@
                 AND member_b_id = GREATEST(#{senderId}, #{receiverId})
         )
     </select>
+
+    <insert id="insertFriend">
+        INSERT INTO friend (member_a_id, member_b_id, created_at)
+        VALUES (LEAST(#{senderId}, #{receiverId}),
+            GREATEST(#{senderId}, #{receiverId}),
+            NOW()
+        )
+    </insert>
 </mapper>

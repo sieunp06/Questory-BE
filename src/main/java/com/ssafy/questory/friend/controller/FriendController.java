@@ -39,4 +39,20 @@ public class FriendController {
             @AuthenticationPrincipal SecurityMember member) {
         return ResponseEntity.ok(friendService.getSentFriendRequests(member));
     }
+
+    @PostMapping("/request/{friendRequestId}/accept")
+    public ResponseEntity<ApiResponse<Void>> accept(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long friendRequestId) {
+        friendService.acceptRequest(member, friendRequestId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("친구 요청을 수락했습니다."));
+    }
+
+    @PostMapping("/request/{friendRequestId}/reject")
+    public ResponseEntity<ApiResponse<Void>> reject(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long friendRequestId) {
+        friendService.rejectRequest(member, friendRequestId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("친구 요청을 거절했습니다."));
+    }
 }

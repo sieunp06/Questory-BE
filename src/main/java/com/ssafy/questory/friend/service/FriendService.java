@@ -15,6 +15,7 @@ import com.ssafy.questory.member.repository.MemberRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -64,5 +65,41 @@ public class FriendService {
     public List<FriendRequestResponseDto> getSentFriendRequests(SecurityMember member) {
         Long memberId = member.getMemberId();
         return friendRequestRepository.findSentRequestsByMemberId(memberId);
+    }
+
+    @Transactional
+    public void acceptRequest(SecurityMember member, Long friendRequestId) {
+        Long receiverId = member.getMemberId();
+
+        FriendRequest friendRequest = friendRequestRepository.findPendingByIdAndReceiverId(friendRequestId, receiverId)
+                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
+
+        Long senderId = friendRequest.getSenderId();
+
+        if (memberRepository.findStatusById(senderId) == MemberStatus.SOFT_DELETE) {
+            throw new CustomException(ErrorCode.MEMBER_DELETED);
+        }
+        if (memberRepository.findStatusById(receiverId) == MemberStatus.SOFT_DELETE) {
+            throw new CustomException(ErrorCode.MEMBER_DELETED);
+        }
+
+        if (friendRepository.existsFriend(senderId, receiverId)) {
+            friendRequestRepository.updateStatus(friendRequestId, FriendStatus.ACCEPTED);
+            return;
+        }
+
+        friendRepository.insertFriend(senderId, receiverId);
+
+        friendRequestRepository.updateStatus(friendRequestId, FriendStatus.ACCEPTED);
+    }
+
+    @Transactional
+    public void rejectRequest(SecurityMember member, Long friendRequestId) {
+        Long receiverId = member.getMemberId();
+
+        friendRequestRepository.findPendingByIdAndReceiverId(friendRequestId, receiverId)
+                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
+
+        friendRequestRepository.updateStatus(friendRequestId, FriendStatus.REJECTED);
     }
 }
