@@ -9,6 +9,7 @@ import java.util.List;
 @Mapper
 public interface FriendRequestRepository {
     List<FriendRequestResponseDto> findRequestsByMemberId(Long memberId);
+    List<FriendRequestResponseDto> findSentRequestsByMemberId(Long memberId);
 
     boolean existsPendingRequestBetween(Long senderId, Long receiverId);
 

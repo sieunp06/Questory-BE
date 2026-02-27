@@ -60,4 +60,9 @@ public class FriendService {
 
         friendRequestRepository.request(friendRequest);
     }
+
+    public List<FriendRequestResponseDto> getSentFriendRequests(SecurityMember member) {
+        Long memberId = member.getMemberId();
+        return friendRequestRepository.findSentRequestsByMemberId(memberId);
+    }
 }

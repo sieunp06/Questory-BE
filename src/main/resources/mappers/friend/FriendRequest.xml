@@ -7,17 +7,33 @@
             parameterType="long"
             resultMap="FriendRequestResponseMap">
         SELECT
-        r.member_id AS member_id,
-        r.email     AS email,
-        r.nickname  AS nickname,
-        fr.status   AS status
+            r.member_id AS member_id,
+            r.email     AS email,
+            r.nickname  AS nickname,
+            fr.status   AS status
         FROM friend_request fr
         JOIN member r ON r.member_id = fr.sender_id
         WHERE fr.receiver_id = #{memberId}
-        AND fr.status = 'PENDING'
-        AND r.status != 'SOFT_DELETE'
+            AND fr.status = 'PENDING'
+            AND r.status != 'SOFT_DELETE'
         ORDER BY fr.created_at DESC
     </select>
+    <select id="findSentRequestsByMemberId"
+            parameterType="long"
+            resultMap="FriendRequestResponseMap">
+        SELECT
+            r.member_id AS member_id,
+            r.email     AS email,
+            r.nickname  AS nickname,
+            fr.status   AS status
+        FROM friend_request fr
+        JOIN member r ON r.member_id = fr.receiver_id
+        WHERE fr.sender_id = #{memberId}
+            AND fr.status = 'PENDING'
+            AND r.status != 'SOFT_DELETE'
+        ORDER BY fr.created_at DESC
+    </select>
+
     <resultMap id="MemberResponseDtoMap"
                type="com.ssafy.questory.member.dto.response.MemberResponseDto">
         <constructor>

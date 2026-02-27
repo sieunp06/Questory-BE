@@ -33,4 +33,10 @@ public class FriendController {
         friendService.request(member, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok("친구 요청이 전송되었습니다."));
     }
+
+    @GetMapping("/request/sent")
+    public ResponseEntity<List<FriendRequestResponseDto>> getSentFriendRequests(
+            @AuthenticationPrincipal SecurityMember member) {
+        return ResponseEntity.ok(friendService.getSentFriendRequests(member));
+    }
 }
