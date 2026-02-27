@@ -1,6 +1,7 @@
 package com.ssafy.questory.friend.controller;
 
 import com.ssafy.questory.common.api.ApiResponse;
+import com.ssafy.questory.friend.dto.FriendRequestResponseDto;
 import com.ssafy.questory.friend.service.FriendService;
 import com.ssafy.questory.mail.dto.request.MemberEmailRequestDto;
 import com.ssafy.questory.member.domain.SecurityMember;
@@ -9,16 +10,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/friend")
 @RequiredArgsConstructor
 public class FriendController {
     private final FriendService friendService;
+
+    @GetMapping("/request")
+    public ResponseEntity<List<FriendRequestResponseDto>> getFriendRequestInfo(
+            @AuthenticationPrincipal SecurityMember member) {
+        return ResponseEntity.status(HttpStatus.OK).body(friendService.getFriendRequests(member));
+    }
 
     @PostMapping("/request")
     public ResponseEntity<ApiResponse<Void>> request(

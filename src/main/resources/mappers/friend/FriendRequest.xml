@@ -3,6 +3,21 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.questory.friend.repository.FriendRequestRepository">
+    <select id="findRequestsByMemberId"
+            parameterType="long"
+            resultMap="FriendRequestResponseMap">
+        SELECT
+        r.member_id AS member_id,
+        r.email     AS email,
+        r.nickname  AS nickname,
+        fr.status   AS status
+        FROM friend_request fr
+        JOIN member r ON r.member_id = fr.sender_id
+        WHERE fr.receiver_id = #{memberId}
+        AND fr.status = 'PENDING'
+        AND r.status != 'SOFT_DELETE'
+        ORDER BY fr.created_at DESC
+    </select>
     <resultMap id="MemberResponseDtoMap"
                type="com.ssafy.questory.member.dto.response.MemberResponseDto">
         <constructor>
