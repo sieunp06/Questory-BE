@@ -13,12 +13,12 @@ public interface FriendRequestRepository {
     List<FriendRequestResponseDto> findRequestsByMemberId(Long memberId);
     List<FriendRequestResponseDto> findSentRequestsByMemberId(Long memberId);
 
-    Optional<FriendRequest> findPendingByIdAndSenderId(Long friendRequestId, Long senderId);
     Optional<FriendRequest> findPendingByIdAndReceiverId(Long friendRequestId, Long receiverId);
 
     boolean existsPendingRequestBetween(Long senderId, Long receiverId);
 
     void request(FriendRequest friendRequest);
 
-    void updateStatus(Long friendRequestId, FriendStatus status);
+    int updateStatusIfPendingByReceiver(Long friendRequestId, Long receiverId, FriendStatus status);
+    int updateStatusIfPendingBySender(Long friendRequestId, Long senderId, FriendStatus status);
 }

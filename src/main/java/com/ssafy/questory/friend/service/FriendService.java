@@ -18,6 +18,7 @@ import com.ssafy.questory.member.repository.MemberRepository;
 import com.ssafy.questory.security.config.MemberAuthPolicy;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -117,10 +118,10 @@ public class FriendService {
     public void acceptRequest(SecurityMember member, Long friendRequestId) {
         Long receiverId = member.getMemberId();
 
-        FriendRequest friendRequest = friendRequestRepository.findPendingByIdAndReceiverId(friendRequestId, receiverId)
+        FriendRequest pending = friendRequestRepository.findPendingByIdAndReceiverId(friendRequestId, receiverId)
                 .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
 
-        Long senderId = friendRequest.getSenderId();
+        Long senderId = pending.getSenderId();
 
         if (memberRepository.findStatusById(senderId) == MemberStatus.SOFT_DELETE) {
             throw new CustomException(ErrorCode.MEMBER_DELETED);
@@ -129,33 +130,42 @@ public class FriendService {
             throw new CustomException(ErrorCode.MEMBER_DELETED);
         }
 
-        if (friendRepository.existsFriend(senderId, receiverId)) {
-            friendRequestRepository.updateStatus(friendRequestId, FriendStatus.ACCEPTED);
-            return;
+        int updated = friendRequestRepository.updateStatusIfPendingByReceiver(
+                friendRequestId, receiverId, FriendStatus.ACCEPTED
+        );
+
+        if (updated == 0) {
+            throw new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND);
         }
 
-        friendRepository.insertFriend(senderId, receiverId);
-
-        friendRequestRepository.updateStatus(friendRequestId, FriendStatus.ACCEPTED);
+        try {
+            friendRepository.insertFriend(senderId, receiverId);
+        } catch (DataIntegrityViolationException e) {}
     }
 
     @Transactional
     public void rejectRequest(SecurityMember member, Long friendRequestId) {
         Long receiverId = member.getMemberId();
 
-        friendRequestRepository.findPendingByIdAndReceiverId(friendRequestId, receiverId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
+        int updated = friendRequestRepository.updateStatusIfPendingByReceiver(
+                friendRequestId, receiverId, FriendStatus.REJECTED
+        );
 
-        friendRequestRepository.updateStatus(friendRequestId, FriendStatus.REJECTED);
+        if (updated == 0) {
+            throw new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND);
+        }
     }
 
     @Transactional
     public void cancelRequest(SecurityMember member, Long friendRequestId) {
         Long senderId = member.getMemberId();
 
-        friendRequestRepository.findPendingByIdAndSenderId(friendRequestId, senderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
+        int updated = friendRequestRepository.updateStatusIfPendingBySender(
+                friendRequestId, senderId, FriendStatus.CANCELED
+        );
 
-        friendRequestRepository.updateStatus(friendRequestId, FriendStatus.CANCELED);
+        if (updated == 0) {
+            throw new CustomException(ErrorCode.FRIEND_REQUEST_NOT_FOUND);
+        }
     }
 }

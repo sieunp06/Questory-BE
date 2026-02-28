@@ -90,12 +90,9 @@
         SELECT EXISTS (
             SELECT 1
             FROM friend_request
-            WHERE (
-                (sender_id = #{senderId} AND receiver_id = #{receiverId})
-                OR
-                (sender_id = #{receiverId} AND receiver_id = #{senderId})
-            )
-            AND status = 'PENDING'
+            WHERE pair_a = LEAST(#{senderId}, #{receiverId})
+                AND pair_b = GREATEST(#{senderId}, #{receiverId})
+                AND pending_flag = 1
         )
     </select>
 
@@ -106,10 +103,26 @@
         VALUES (#{senderId}, #{receiverId}, #{status}, #{createdAt})
     </insert>
 
-    <update id="updateStatus">
+    <update id="updateStatusIfPending">
         UPDATE friend_request
         SET status = #{status},
         responded_at = NOW()
         WHERE friend_request_id = #{friendRequestId}
+            AND status = 'PENDING'
+    </update>
+    <update id="updateStatusIfPendingByReceiver">
+        UPDATE friend_request
+        SET status = #{status}, responded_at = NOW()
+        WHERE friend_request_id = #{friendRequestId}
+            AND receiver_id = #{receiverId}
+            AND status = 'PENDING'
+    </update>
+
+    <update id="updateStatusIfPendingBySender">
+        UPDATE friend_request
+        SET status = #{status}, responded_at = NOW()
+        WHERE friend_request_id = #{friendRequestId}
+            AND sender_id = #{senderId}
+            AND status = 'PENDING'
     </update>
 </mapper>

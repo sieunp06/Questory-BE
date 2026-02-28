@@ -116,10 +116,20 @@ CREATE TABLE friend_request (
     created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     responded_at        DATETIME NULL,
 
+    pair_a BIGINT GENERATED ALWAYS AS (LEAST(sender_id, receiver_id)) STORED,
+    pair_b BIGINT GENERATED ALWAYS AS (GREATEST(sender_id, receiver_id)) STORED,
+
+    pending_flag TINYINT GENERATED ALWAYS AS (
+        CASE WHEN status = 'PENDING' THEN 1 ELSE NULL END
+    ) STORED,
+
     PRIMARY KEY (friend_request_id),
 
     KEY idx_receiver_status_created (receiver_id, status, created_at),
     KEY idx_sender_status_created   (sender_id, status, created_at),
+    KEY idx_pair_pending (pair_a, pair_b, pending_flag),
+
+    UNIQUE KEY uk_fr_pair_pending (pair_a, pair_b, pending_flag),
 
     CONSTRAINT fk_fr_sender   FOREIGN KEY (sender_id)   REFERENCES member(member_id),
     CONSTRAINT fk_fr_receiver FOREIGN KEY (receiver_id) REFERENCES member(member_id),
