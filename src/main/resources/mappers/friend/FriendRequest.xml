@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.friend.repository.FriendRequestRepository">
+    <select id="findRequestsByMemberId"
+            parameterType="long"
+            resultMap="FriendRequestResponseMap">
+        SELECT
+            fr.friend_request_id AS friend_request_id,
+            r.member_id          AS member_id,
+            r.email              AS email,
+            r.nickname           AS nickname,
+            fr.status            AS status
+        FROM friend_request fr
+        JOIN member r ON r.member_id = fr.sender_id
+        WHERE fr.receiver_id = #{memberId}
+            AND fr.status = 'PENDING'
+            AND r.status != 'SOFT_DELETE'
+        ORDER BY fr.created_at DESC
+    </select>
+
+    <select id="findSentRequestsByMemberId"
+            parameterType="long"
+            resultMap="FriendRequestResponseMap">
+        SELECT
+            fr.friend_request_id AS friend_request_id,
+            r.member_id          AS member_id,
+            r.email              AS email,
+            r.nickname           AS nickname,
+            fr.status            AS status
+        FROM friend_request fr
+        JOIN member r ON r.member_id = fr.receiver_id
+        WHERE fr.sender_id = #{memberId}
+            AND fr.status = 'PENDING'
+            AND r.status != 'SOFT_DELETE'
+        ORDER BY fr.created_at DESC
+    </select>
+    <select id="findPendingByIdAndSenderId"
+            resultType="com.ssafy.questory.friend.domain.FriendRequest">
+        SELECT  friend_request_id AS friendRequestId,
+        sender_id         AS senderId,
+        receiver_id       AS receiverId,
+        status            AS status,
+        created_at        AS createdAt,
+        responded_at      AS respondedAt
+        FROM friend_request
+        WHERE friend_request_id = #{friendRequestId}
+        AND sender_id = #{senderId}
+        AND status = 'PENDING'
+    </select>
+
+    <resultMap id="MemberResponseDtoMap"
+               type="com.ssafy.questory.member.dto.response.MemberResponseDto">
+        <constructor>
+            <arg column="member_id" javaType="java.lang.Long"/>
+            <arg column="email"     javaType="java.lang.String"/>
+            <arg column="nickname"  javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="FriendRequestResponseMap"
+               type="com.ssafy.questory.friend.dto.FriendRequestResponseDto">
+        <constructor>
+            <arg column="friend_request_id" javaType="java.lang.Long"/>
+
+            <arg javaType="com.ssafy.questory.member.dto.response.MemberResponseDto"
+                 resultMap="MemberResponseDtoMap"/>
+
+            <arg column="status"
+                 javaType="com.ssafy.questory.friend.domain.FriendStatus"/>
+        </constructor>
+    </resultMap>
+
+    <select id="findPendingByIdAndReceiverId"
+            resultType="com.ssafy.questory.friend.domain.FriendRequest">
+        SELECT  friend_request_id AS friendRequestId,
+                sender_id         AS senderId,
+                receiver_id       AS receiverId,
+                status            AS status,
+                created_at        AS createdAt,
+                responded_at      AS respondedAt
+        FROM friend_request
+        WHERE friend_request_id = #{friendRequestId}
+            AND receiver_id = #{receiverId}
+            AND status = 'PENDING'
+    </select>
+
+    <select id="existsPendingRequestBetween" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM friend_request
+            WHERE pair_a = LEAST(#{senderId}, #{receiverId})
+                AND pair_b = GREATEST(#{senderId}, #{receiverId})
+                AND pending_flag = 1
+        )
+    </select>
+
+    <insert id="request"
+            parameterType="com.ssafy.questory.friend.domain.FriendRequest"
+            useGeneratedKeys="true" keyProperty="friendRequestId">
+        INSERT INTO FRIEND_REQUEST (sender_id, receiver_id, status, created_at)
+        VALUES (#{senderId}, #{receiverId}, #{status}, #{createdAt})
+    </insert>
+
+    <update id="updateStatusIfPending">
+        UPDATE friend_request
+        SET status = #{status},
+        responded_at = NOW()
+        WHERE friend_request_id = #{friendRequestId}
+            AND status = 'PENDING'
+    </update>
+    <update id="updateStatusIfPendingByReceiver">
+        UPDATE friend_request
+        SET status = #{status}, responded_at = NOW()
+        WHERE friend_request_id = #{friendRequestId}
+            AND receiver_id = #{receiverId}
+            AND status = 'PENDING'
+    </update>
+
+    <update id="updateStatusIfPendingBySender">
+        UPDATE friend_request
+        SET status = #{status}, responded_at = NOW()
+        WHERE friend_request_id = #{friendRequestId}
+            AND sender_id = #{senderId}
+            AND status = 'PENDING'
+    </update>
+</mapper>

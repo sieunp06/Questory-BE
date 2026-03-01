@@ -38,7 +38,13 @@ public enum ErrorCode {
     // Title
     MEMBER_TITLE_NOT_OWNED(HttpStatus.BAD_REQUEST, "보유하지 않은 칭호입니다."),
     TITLE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 칭호입니다."),
-    MEMBER_TITLE_ALREADY_OWNED(HttpStatus.CONFLICT, "이미 보유한 칭호입니다.");
+    MEMBER_TITLE_ALREADY_OWNED(HttpStatus.CONFLICT, "이미 보유한 칭호입니다."),
+
+    // Friend
+    ALREADY_FRIEND(HttpStatus.BAD_REQUEST, "이미 친구입니다."),
+    DUPLICATE_REQUEST(HttpStatus.CONFLICT, "중복된 친구 요청입니다."),
+    FRIEND_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "친구 요청이 존재하지 않습니다."),
+    FRIEND_NOT_FOUND(HttpStatus.BAD_REQUEST, "친구가 아닙니다.");
 
     private final HttpStatus status;
     private final String message;

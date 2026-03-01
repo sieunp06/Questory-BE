@@ -87,3 +87,54 @@ CREATE TABLE member_title (
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE friend (
+    friend_id   BIGINT NOT NULL AUTO_INCREMENT,
+    member_a_id BIGINT NOT NULL,
+    member_b_id BIGINT NOT NULL,
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (friend_id),
+    UNIQUE KEY uk_friendship_pair (member_a_id, member_b_id),
+
+    KEY idx_friendship_a (member_a_id, created_at),
+    KEY idx_friendship_b (member_b_id, created_at),
+
+    CONSTRAINT fk_friendship_a FOREIGN KEY (member_a_id) REFERENCES member(member_id),
+    CONSTRAINT fk_friendship_b FOREIGN KEY (member_b_id) REFERENCES member(member_id),
+
+    CONSTRAINT chk_friendship_order CHECK (member_a_id < member_b_id)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE friend_request (
+    friend_request_id   BIGINT NOT NULL AUTO_INCREMENT,
+    sender_id           BIGINT NOT NULL,
+    receiver_id         BIGINT NOT NULL,
+    status              ENUM('PENDING','ACCEPTED','REJECTED','CANCELED') NOT NULL DEFAULT 'PENDING',
+    created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    responded_at        DATETIME NULL,
+
+    pair_a BIGINT GENERATED ALWAYS AS (LEAST(sender_id, receiver_id)) STORED,
+    pair_b BIGINT GENERATED ALWAYS AS (GREATEST(sender_id, receiver_id)) STORED,
+
+    pending_flag TINYINT GENERATED ALWAYS AS (
+        CASE WHEN status = 'PENDING' THEN 1 ELSE NULL END
+    ) STORED,
+
+    PRIMARY KEY (friend_request_id),
+
+    KEY idx_receiver_status_created (receiver_id, status, created_at),
+    KEY idx_sender_status_created   (sender_id, status, created_at),
+    KEY idx_pair_pending (pair_a, pair_b, pending_flag),
+
+    UNIQUE KEY uk_fr_pair_pending (pair_a, pair_b, pending_flag),
+
+    CONSTRAINT fk_fr_sender   FOREIGN KEY (sender_id)   REFERENCES member(member_id),
+    CONSTRAINT fk_fr_receiver FOREIGN KEY (receiver_id) REFERENCES member(member_id),
+
+    CONSTRAINT chk_fr_not_self CHECK (sender_id <> receiver_id)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;

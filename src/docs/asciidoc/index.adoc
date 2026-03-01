@@ -17,7 +17,7 @@ operation::auth-exchange[snippets='http-request,http-response,request-fields,res
 
 ==== 1-2. exchange 실패 (400 - Validation)
 
-operation::auth-exchange-400[snippets='http-request,http-response,request-fields']
+operation::auth-exchange-400[snippets='http-request,http-response,request-fields,response-fields']
 
 === 2. OAuth2 Social Login
 
@@ -48,7 +48,7 @@ operation::member-register[snippets='http-request,http-response,request-fields,r
 
 ==== 1-2. 회원가입 실패 (Validation)
 
-operation::member-register-400[snippets='http-request,http-response']
+operation::member-register-400[snippets='http-request,http-response,response-fields']
 
 
 === 2. 로그인
@@ -59,7 +59,7 @@ operation::member-login[snippets='http-request,http-response,request-fields,resp
 
 ==== 2-2. 로그인 실패 (Validation)
 
-operation::member-login-400[snippets='http-request,http-response']
+operation::member-login-400[snippets='http-request,http-response,response-fields']
 
 
 === 3. Access Token 재발급
@@ -70,7 +70,7 @@ operation::member-refresh[snippets='http-request,http-response,response-headers'
 
 ==== 3-2. 재발급 실패 (refresh_token 없음)
 
-operation::member-refresh-401-no-cookie[snippets='http-request,http-response']
+operation::member-refresh-401-no-cookie[snippets='http-request,http-response,response-fields']
 
 
 === 4. 로그아웃
@@ -123,4 +123,65 @@ operation::title-update-representative-success[snippets='http-request,http-respo
 
 ==== 4-4. 칭호 획득 실패 (Validation)
 
-operation::title-acquire-400-validation[snippets='http-request,http-response']
+operation::title-acquire-400-validation[snippets='http-request,http-response,response-fields']
+
+
+== 5. Friend API
+
+=== 1. 친구 목록
+
+==== 1-1. 친구 목록 조회 성공 (200)
+
+operation::friend-get-friends[snippets='http-request,http-response,response-fields']
+
+
+=== 2. 친구 삭제
+
+==== 2-1. 친구 삭제 성공 (200)
+
+operation::friend-delete-friend[snippets='http-request,http-response,path-parameters,response-fields']
+
+
+=== 3. 친구 요청
+
+==== 3-1. 받은 친구 요청 목록 조회 성공 (200)
+
+operation::friend-get-received-requests[snippets='http-request,http-response,response-fields']
+
+==== 3-2. 친구 요청 보내기 성공 (201)
+
+operation::friend-request-send[snippets='http-request,http-response,request-fields,response-fields']
+
+==== 3-3. 친구 요청 보내기 실패 (400 - Validation: email blank)
+
+operation::friend-request-send-400-blank-email[snippets='http-request,http-response,request-fields,response-fields']
+
+==== 3-4. 친구 요청 보내기 실패 (400 - Validation: email invalid)
+
+operation::friend-request-send-400-invalid-email[snippets='http-request,http-response,request-fields,response-fields']
+
+==== 3-5. 친구 요청 보내기 실패 (400 - JSON 파싱 실패)
+
+operation::friend-request-send-400-not-readable[snippets='http-request,http-response,response-fields']
+
+
+=== 4. 보낸 친구 요청
+
+==== 4-1. 보낸 친구 요청 목록 조회 성공 (200)
+
+operation::friend-get-sent-requests[snippets='http-request,http-response,response-fields']
+
+
+=== 5. 친구 요청 처리
+
+==== 5-1. 친구 요청 수락 성공 (200)
+
+operation::friend-request-accept[snippets='http-request,http-response,path-parameters,response-fields']
+
+==== 5-2. 친구 요청 거절 성공 (200)
+
+operation::friend-request-reject[snippets='http-request,http-response,path-parameters,response-fields']
+
+==== 5-3. 친구 요청 취소 성공 (200)
+
+operation::friend-request-cancel[snippets='http-request,http-response,path-parameters,response-fields']
