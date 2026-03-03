@@ -33,4 +33,12 @@ public class PartyController {
         partyService.updateName(member, partyId, dto);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("파티 이름 변경에 성공했습니다."));
     }
+
+    @DeleteMapping("/{partyId}")
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long partyId) {
+        partyService.delete(member, partyId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("파티 삭제가 완료되었습니다."));
+    }
 }

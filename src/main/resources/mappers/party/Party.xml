@@ -21,4 +21,9 @@
         SET name = #{name}
         WHERE party_id = #{partyId} AND creator_id = #{memberId}
     </update>
+
+    <delete id="deleteIfCreator">
+        DELETE FROM party
+        WHERE party_id = #{partyId} AND creator_id = #{memberId}
+    </delete>
 </mapper>

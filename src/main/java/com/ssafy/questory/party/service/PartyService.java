@@ -64,6 +64,20 @@ public class PartyService {
         int updated = partyRepository.updateNameIfCreator(memberId, partyId, partyName);
         if (updated == 1) return;
 
+        validatePartyExistsAndCreator(partyId, memberId);
+    }
+
+    @Transactional
+    public void delete(SecurityMember member, Long partyId) {
+        Long memberId = member.getMemberId();
+
+        int deleted = partyRepository.deleteIfCreator(memberId, partyId);
+        if (deleted == 1) return;
+
+        validatePartyExistsAndCreator(partyId, memberId);
+    }
+
+    private void validatePartyExistsAndCreator(Long partyId, Long memberId) {
         Party party = partyRepository.findByPartyId(partyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PARTY_NOT_FOUND));
         if (!party.getCreatorId().equals(memberId)) {

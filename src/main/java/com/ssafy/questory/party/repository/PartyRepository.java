@@ -12,4 +12,6 @@ public interface PartyRepository {
     Optional<Party> findByPartyId(Long partyId);
 
     int updateNameIfCreator(Long partyId, Long memberId, String name);
+
+    int deleteIfCreator(Long memberId, Long partyId);
 }
