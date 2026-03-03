@@ -15,6 +15,20 @@
         FROM party
         WHERE party_id = #{partyId}
     </select>
+    <select id="findMyParties" resultType="com.ssafy.questory.party.dto.response.PartyInfoDto">
+        SELECT
+            p.party_id      AS partyId,
+            p.name          AS name,
+            p.creator_id    AS creatorId,
+            pm.role         AS role,
+            pm.joined_at    AS joinedAt,
+            p.created_at    AS createdAt,
+            p.updated_at    AS updatedAt
+        FROM party_member pm
+        JOIN party p ON p.party_id = pm.party_id
+        WHERE pm.member_id = #{memberId}
+        ORDER BY pm.joined_at DESC
+    </select>
 
     <update id="updateNameIfCreator">
         UPDATE party

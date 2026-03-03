@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -51,8 +52,15 @@ public class PartyService {
                 .partyId(party.getPartyId())
                 .name(partyName)
                 .creatorId(creatorId)
+                .role(partyMember.getRole())
+                .joinedAt(now)
                 .createdAt(now)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartyInfoDto> getMyParties(SecurityMember member) {
+        return partyRepository.findMyParties(member.getMemberId());
     }
 
     @Transactional

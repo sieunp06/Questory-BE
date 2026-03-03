@@ -1,6 +1,7 @@
 package com.ssafy.questory.party.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ssafy.questory.party.domain.PartyMemberRole;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,11 @@ public record PartyInfoDto(
 
         @JsonProperty("creator_id")
         Long creatorId,
+
+        PartyMemberRole role,
+
+        @JsonProperty("joined_at")
+        LocalDateTime joinedAt,
 
         @JsonProperty("created_at")
         LocalDateTime createdAt
