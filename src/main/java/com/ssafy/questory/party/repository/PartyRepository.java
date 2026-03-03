@@ -1,6 +1,6 @@
-package com.ssafy.questory.group.repository;
+package com.ssafy.questory.party.repository;
 
-import com.ssafy.questory.group.domain.Party;
+import com.ssafy.questory.party.domain.Party;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

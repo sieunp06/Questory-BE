@@ -1,4 +1,4 @@
-package com.ssafy.questory.group.dto.response;
+package com.ssafy.questory.party.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;

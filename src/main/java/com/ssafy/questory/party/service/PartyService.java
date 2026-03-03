@@ -1,12 +1,12 @@
-package com.ssafy.questory.group.service;
+package com.ssafy.questory.party.service;
 
-import com.ssafy.questory.group.domain.Party;
-import com.ssafy.questory.group.domain.PartyMember;
-import com.ssafy.questory.group.domain.PartyMemberRole;
-import com.ssafy.questory.group.dto.request.CreateAndUpdateDto;
-import com.ssafy.questory.group.dto.response.PartyInfoDto;
-import com.ssafy.questory.group.repository.PartyMemberRepository;
-import com.ssafy.questory.group.repository.PartyRepository;
+import com.ssafy.questory.party.domain.Party;
+import com.ssafy.questory.party.domain.PartyMember;
+import com.ssafy.questory.party.domain.PartyMemberRole;
+import com.ssafy.questory.party.dto.request.CreateAndUpdateDto;
+import com.ssafy.questory.party.dto.response.PartyInfoDto;
+import com.ssafy.questory.party.repository.PartyMemberRepository;
+import com.ssafy.questory.party.repository.PartyRepository;
 import com.ssafy.questory.member.domain.SecurityMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

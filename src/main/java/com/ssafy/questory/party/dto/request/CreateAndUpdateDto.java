@@ -1,4 +1,4 @@
-package com.ssafy.questory.group.dto.request;
+package com.ssafy.questory.party.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

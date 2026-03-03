@@ -1,8 +1,8 @@
-package com.ssafy.questory.group.controller;
+package com.ssafy.questory.party.controller;
 
-import com.ssafy.questory.group.dto.request.CreateAndUpdateDto;
-import com.ssafy.questory.group.dto.response.PartyInfoDto;
-import com.ssafy.questory.group.service.PartyService;
+import com.ssafy.questory.party.dto.request.CreateAndUpdateDto;
+import com.ssafy.questory.party.dto.response.PartyInfoDto;
+import com.ssafy.questory.party.service.PartyService;
 import com.ssafy.questory.member.domain.SecurityMember;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

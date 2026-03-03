@@ -1,4 +1,4 @@
-package com.ssafy.questory.group.domain;
+package com.ssafy.questory.party.domain;
 
 public enum PartyMemberRole {
     OWNER,
