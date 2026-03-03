@@ -67,4 +67,12 @@ public class PartyController {
             @PathVariable Long partyId) {
         return ResponseEntity.status(HttpStatus.OK).body(partyService.getPartyMembers(member, partyId));
     }
+
+    @DeleteMapping("/{partyId}/members/me")
+    public ResponseEntity<ApiResponse<Void>> leave(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long partyId) {
+       partyService.leave(member, partyId);
+       return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("파티 탈퇴가 완료되었습니다."));
+    }
 }

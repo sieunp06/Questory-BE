@@ -125,6 +125,24 @@ public class PartyService {
         return partyMemberRepository.findMembersByPartyId(partyId);
     }
 
+    @Transactional
+    public void leave(SecurityMember member, Long partyId) {
+        Long memberId = member.getMemberId();
+
+        if (!partyMemberRepository.exists(partyId, memberId)) {
+            throw new CustomException(ErrorCode.PARTY_MEMBER_NOT_FOUND);
+        }
+
+        if (partyMemberRepository.isOwner(partyId, memberId)) {
+            throw new CustomException(ErrorCode.PARTY_OWNER_CANNOT_LEAVE);
+        }
+
+        int deleted = partyMemberRepository.delete(partyId, memberId);
+        if (deleted != 1) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+    }
+
     private void validatePartyExistsAndCreator(Long partyId, Long memberId) {
         Party party = partyRepository.findByPartyId(partyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PARTY_NOT_FOUND));

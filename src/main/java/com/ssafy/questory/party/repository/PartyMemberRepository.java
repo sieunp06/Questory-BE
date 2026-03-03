@@ -14,8 +14,10 @@ public interface PartyMemberRepository {
 
     boolean existsActiveMember(Long partyId, Long memberId);
     boolean exists(Long partyId, Long memberId);
+    boolean isOwner(Long partyId, Long memberId);
 
     int demoteOwnerToMember(Long partyId, Long memberId);
-
     int promoteMemberToOwner(Long partyId, Long memberId);
+
+    int delete(Long partyId, Long memberId);
 }

@@ -42,6 +42,15 @@
                 AND member_id = #{memberId}
         )
     </select>
+    <select id="isOwner" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM party_member
+            WHERE party_id = #{partyId}
+                AND member_id = #{memberId}
+                AND role = 'OWNER'
+        )
+    </select>
     
     <update id="demoteOwnerToMember">
         UPDATE party_member
@@ -57,4 +66,11 @@
             AND member_id = #{memberId}
             AND role = 'MEMBER'
     </update>
+
+    <delete id="delete">
+        DELETE FROM party_member
+        WHERE party_id = #{partyId}
+            AND member_id = #{memberId}
+            AND role != 'OWNER'
+    </delete>
 </mapper>
