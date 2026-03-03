@@ -44,7 +44,12 @@ public enum ErrorCode {
     ALREADY_FRIEND(HttpStatus.BAD_REQUEST, "이미 친구입니다."),
     DUPLICATE_REQUEST(HttpStatus.CONFLICT, "중복된 친구 요청입니다."),
     FRIEND_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "친구 요청이 존재하지 않습니다."),
-    FRIEND_NOT_FOUND(HttpStatus.BAD_REQUEST, "친구가 아닙니다.");
+    FRIEND_NOT_FOUND(HttpStatus.BAD_REQUEST, "친구가 아닙니다."),
+
+    // Party
+    INVALID_PARTY_NAME(HttpStatus.BAD_REQUEST, "올바르지 않은 파티 이름입니다."),
+    PARTY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 파티는 존재하지 않습니다."),
+    FORBIDDEN_PARTY_CREATOR_ONLY(HttpStatus.FORBIDDEN, "파티 생성자만 수행할 수 있습니다.");
 
     private final HttpStatus status;
     private final String message;

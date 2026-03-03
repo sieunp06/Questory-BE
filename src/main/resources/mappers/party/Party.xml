@@ -9,4 +9,16 @@
         INSERT INTO party (name, creator_id, created_at)
         VALUES (#{name}, #{creatorId}, #{createdAt})
     </insert>
+
+    <select id="findByPartyId" resultType="com.ssafy.questory.party.domain.Party">
+        SELECT party_id AS partyId, name, creator_id AS creatorId, created_at AS createdAt, updated_at AS updatedAt
+        FROM party
+        WHERE party_id = #{partyId}
+    </select>
+
+    <update id="updateNameIfCreator">
+        UPDATE party
+        SET name = #{name}
+        WHERE party_id = #{partyId} AND creator_id = #{memberId}
+    </update>
 </mapper>
