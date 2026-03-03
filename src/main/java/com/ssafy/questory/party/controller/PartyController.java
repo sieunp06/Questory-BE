@@ -2,6 +2,7 @@ package com.ssafy.questory.party.controller;
 
 import com.ssafy.questory.common.api.ApiResponse;
 import com.ssafy.questory.party.dto.request.CreateAndUpdateDto;
+import com.ssafy.questory.party.dto.request.DelegateOwnerRequestDto;
 import com.ssafy.questory.party.dto.response.PartyInfoDto;
 import com.ssafy.questory.party.service.PartyService;
 import com.ssafy.questory.member.domain.SecurityMember;
@@ -40,5 +41,14 @@ public class PartyController {
             @PathVariable Long partyId) {
         partyService.delete(member, partyId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("파티 삭제가 완료되었습니다."));
+    }
+
+    @PatchMapping("/{partyId}/owner")
+    public ResponseEntity<ApiResponse<Void>> delegateOwner(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long partyId,
+            @Valid @RequestBody DelegateOwnerRequestDto dto) {
+        partyService.delegateOwner(member, partyId, dto);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("방장 위임이 완료되었습니다."));
     }
 }

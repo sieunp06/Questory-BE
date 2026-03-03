@@ -6,6 +6,7 @@ import com.ssafy.questory.party.domain.Party;
 import com.ssafy.questory.party.domain.PartyMember;
 import com.ssafy.questory.party.domain.PartyMemberRole;
 import com.ssafy.questory.party.dto.request.CreateAndUpdateDto;
+import com.ssafy.questory.party.dto.request.DelegateOwnerRequestDto;
 import com.ssafy.questory.party.dto.response.PartyInfoDto;
 import com.ssafy.questory.party.repository.PartyMemberRepository;
 import com.ssafy.questory.party.repository.PartyRepository;
@@ -75,6 +76,34 @@ public class PartyService {
         if (deleted == 1) return;
 
         validatePartyExistsAndCreator(partyId, memberId);
+    }
+
+    @Transactional
+    public void delegateOwner(SecurityMember member, Long partyId, @Valid DelegateOwnerRequestDto dto) {
+        Long currentOwnerId = member.getMemberId();
+        Long newOwnerId = dto.newOwnerId();
+
+        if (newOwnerId == null) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+        if (currentOwnerId.equals(newOwnerId)) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        if (!partyMemberRepository.existsActiveMember(partyId, newOwnerId)) {
+            throw new CustomException(ErrorCode.PARTY_MEMBER_NOT_FOUND);
+        }
+
+        int demoted = partyMemberRepository.demoteOwnerToMember(partyId, currentOwnerId);
+        if (demoted != 1) {
+            validatePartyExistsAndCreator(partyId, currentOwnerId);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+
+        int promoted = partyMemberRepository.promoteMemberToOwner(partyId, newOwnerId);
+        if (promoted != 1) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
     }
 
     private void validatePartyExistsAndCreator(Long partyId, Long memberId) {

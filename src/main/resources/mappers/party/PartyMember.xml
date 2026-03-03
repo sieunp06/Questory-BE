@@ -9,4 +9,28 @@
         INSERT INTO party_member (party_id, member_id, role, joined_at)
         VALUES (#{partyId}, #{memberId}, #{role}, #{joinedAt})
     </insert>
+
+    <select id="existsActiveMember" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM party_member
+            WHERE party_id = #{partyId}
+                AND member_id = #{memberId}
+        )
+    </select>
+    
+    <update id="demoteOwnerToMember">
+        UPDATE party_member
+        SET role = 'MEMBER'
+        WHERE party_id = #{partyId}
+            AND member_id = #{memberId}
+            AND role = 'OWNER'
+    </update>
+    <update id="promoteMemberToOwner">
+        UPDATE party_member
+        SET role = 'OWNER'
+        WHERE party_id = #{partyId}
+            AND member_id = #{memberId}
+            AND role = 'MEMBER'
+    </update>
 </mapper>
