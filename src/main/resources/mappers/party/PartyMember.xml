@@ -10,7 +10,31 @@
         VALUES (#{partyId}, #{memberId}, #{role}, #{joinedAt})
     </insert>
 
+    <select id="findMembersByPartyId" resultType="com.ssafy.questory.party.dto.response.PartyMemberInfoDto">
+        SELECT
+            m.member_id     AS memberId,
+            m.email         AS email,
+            m.nickname      AS nickname,
+            pm.role         AS role,
+            pm.joined_at    AS joinedAt
+        FROM party_member pm
+        JOIN member m ON m.member_id = pm.member_id
+        WHERE pm.party_id = #{partyId}
+            AND m.status != 'SOFT_DELETE'
+        ORDER BY
+            CASE pm.role WHEN 'OWNER' THEN 0 ELSE 1 END,
+            pm.joined_at ASC
+    </select>
+
     <select id="existsActiveMember" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM party_member
+            WHERE party_id = #{partyId}
+                AND member_id = #{memberId}
+        )
+    </select>
+    <select id="exists" resultType="boolean">
         SELECT EXISTS(
             SELECT 1
             FROM party_member

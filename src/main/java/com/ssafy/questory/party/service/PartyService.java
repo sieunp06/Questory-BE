@@ -8,6 +8,7 @@ import com.ssafy.questory.party.domain.PartyMemberRole;
 import com.ssafy.questory.party.dto.request.CreateAndUpdateDto;
 import com.ssafy.questory.party.dto.request.DelegateOwnerRequestDto;
 import com.ssafy.questory.party.dto.response.PartyInfoDto;
+import com.ssafy.questory.party.dto.response.PartyMemberInfoDto;
 import com.ssafy.questory.party.repository.PartyMemberRepository;
 import com.ssafy.questory.party.repository.PartyRepository;
 import com.ssafy.questory.member.domain.SecurityMember;
@@ -112,6 +113,16 @@ public class PartyService {
         if (promoted != 1) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartyMemberInfoDto> getPartyMembers(SecurityMember member, Long partyId) {
+        Long memberId = member.getMemberId();
+
+        if (!partyMemberRepository.exists(partyId, memberId)) {
+            throw new CustomException(ErrorCode.PARTY_MEMBER_NOT_FOUND);
+        }
+        return partyMemberRepository.findMembersByPartyId(partyId);
     }
 
     private void validatePartyExistsAndCreator(Long partyId, Long memberId) {

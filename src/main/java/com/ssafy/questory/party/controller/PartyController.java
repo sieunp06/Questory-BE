@@ -5,6 +5,7 @@ import com.ssafy.questory.member.domain.SecurityMember;
 import com.ssafy.questory.party.dto.request.CreateAndUpdateDto;
 import com.ssafy.questory.party.dto.request.DelegateOwnerRequestDto;
 import com.ssafy.questory.party.dto.response.PartyInfoDto;
+import com.ssafy.questory.party.dto.response.PartyMemberInfoDto;
 import com.ssafy.questory.party.service.PartyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -58,5 +59,12 @@ public class PartyController {
             @Valid @RequestBody DelegateOwnerRequestDto dto) {
         partyService.delegateOwner(member, partyId, dto);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("방장 위임이 완료되었습니다."));
+    }
+
+    @GetMapping("/{partyId}/members")
+    public ResponseEntity<List<PartyMemberInfoDto>> getMembers(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long partyId) {
+        return ResponseEntity.status(HttpStatus.OK).body(partyService.getPartyMembers(member, partyId));
     }
 }
