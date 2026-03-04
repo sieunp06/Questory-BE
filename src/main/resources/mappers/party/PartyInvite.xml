@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.party.repository.PartyInviteRepository">
+    <insert id="insert"
+            parameterType="com.ssafy.questory.party.domain.PartyInvite"
+            useGeneratedKeys="true" keyProperty="inviteId">
+        INSERT INTO party_invite (party_id, inviter_id, invitee_id, status, created_at)
+        VALUES (#{partyId}, #{inviterId}, #{inviteeId}, #{status}, #{createdAt})
+    </insert>
+</mapper>
