@@ -16,11 +16,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -45,35 +41,60 @@ public class PartyInviteService {
             invitees.add(id);
         }
 
-        List results = new ArrayList<InviteResponsesDto.InviteResultDto>();
-        for (Long inviteeId : invitees) {
-            boolean isFriend = friendRepository.existsFriend(inviterId, inviteeId);
-            if (!isFriend) {
-                results.add(result(inviteeId, "NOT_FRIEND", "친구만 초대할 수 있습니다."));
+        List<Long> targets = new ArrayList<>(invitees);
+        Set<Long> friendSet = new HashSet<>(
+                friendRepository.findFriendIdsAmong(inviterId, targets)
+        );
+
+        Set<Long> alreadyMemberSet = new HashSet<>(
+                partyMemberRepository.findExistingMemberIds(partyId, targets)
+        );
+
+        List<InviteResponsesDto.InviteResultDto> results = new ArrayList<>();
+
+        for (Long inviteeId : targets) {
+            if (!friendSet.contains(inviteeId)) {
+                results.add(InviteResponsesDto.InviteResultDto.builder()
+                        .inviteeId(inviteeId)
+                        .result("NOT_FRIEND")
+                        .message("친구만 초대할 수 있습니다.")
+                        .build());
                 continue;
             }
 
-            boolean isAlreadyMember = partyMemberRepository.existsActiveMember(partyId, inviteeId);
-            if (isAlreadyMember) {
-                results.add(result(inviteeId, "ALREADY_MEMBER", "이미 파티에 가입된 사용자입니다."));
+            if (alreadyMemberSet.contains(inviteeId)) {
+                results.add(InviteResponsesDto.InviteResultDto.builder()
+                        .inviteeId(inviteeId)
+                        .result("ALREADY_MEMBER")
+                        .message("이미 파티에 가입된 사용자입니다.")
+                        .build());
                 continue;
             }
 
-            PartyInvite partyInvite = PartyInvite.builder()
+            PartyInvite invite = PartyInvite.builder()
                     .partyId(partyId)
                     .inviterId(inviterId)
                     .inviteeId(inviteeId)
                     .status(PartyInviteStatus.PENDING)
-                    .createdAt(LocalDateTime.now())
+                    .createdAt(java.time.LocalDateTime.now())
                     .build();
 
             try {
-                partyInviteRepository.insert(partyInvite);
-                results.add(result(inviteeId, "CREATED", "초대가 생성되었습니다."));
+                partyInviteRepository.insert(invite);
+                results.add(InviteResponsesDto.InviteResultDto.builder()
+                        .inviteeId(inviteeId)
+                        .result("CREATED")
+                        .message("초대가 생성되었습니다.")
+                        .build());
             } catch (DuplicateKeyException e) {
-                results.add(result(inviteeId, "DUPLICATE", "이미 대기 중인 초대가 존재합니다."));
+                results.add(InviteResponsesDto.InviteResultDto.builder()
+                        .inviteeId(inviteeId)
+                        .result("DUPLICATE")
+                        .message("이미 대기 중인 초대가 존재합니다.")
+                        .build());
             }
         }
+
         return InviteResponsesDto.builder()
                 .results(results)
                 .build();

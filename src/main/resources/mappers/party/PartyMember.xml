@@ -25,6 +25,15 @@
             CASE pm.role WHEN 'OWNER' THEN 0 ELSE 1 END,
             pm.joined_at ASC
     </select>
+    <select id="findExistingMemberIds" resultType="long">
+        SELECT member_id
+        FROM party_member
+        WHERE party_id = #{partyId}
+            AND member_id IN
+            <foreach collection="targets" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+    </select>
 
     <select id="existsActiveMember" resultType="boolean">
         SELECT EXISTS(

@@ -11,12 +11,14 @@ public interface PartyMemberRepository {
     void insert(PartyMember partyMember);
 
     List<PartyMemberInfoDto> findMembersByPartyId(Long partyId);
+    List<Long> findExistingMemberIds(Long partyId, List<Long> targets);
 
     boolean existsActiveMember(Long partyId, Long memberId);
     boolean exists(Long partyId, Long memberId);
-    boolean isOwner(Long partyId, Long memberId);
 
+    boolean isOwner(Long partyId, Long memberId);
     int demoteOwnerToMember(Long partyId, Long memberId);
+
     int promoteMemberToOwner(Long partyId, Long memberId);
 
     int delete(Long partyId, Long memberId);
