@@ -51,7 +51,8 @@ public enum ErrorCode {
     PARTY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 파티는 존재하지 않습니다."),
     FORBIDDEN_PARTY_CREATOR_ONLY(HttpStatus.FORBIDDEN, "파티 생성자만 수행할 수 있습니다."),
     PARTY_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 회원은 파티 멤버가 아닙니다."),
-    PARTY_OWNER_CANNOT_LEAVE(HttpStatus.BAD_REQUEST, "방장은 파티를 탈퇴할 수 없습니다.");
+    PARTY_OWNER_CANNOT_LEAVE(HttpStatus.BAD_REQUEST, "방장은 파티를 탈퇴할 수 없습니다."),
+    PARTY_INVITE_CANCEL_NOT_ALLOWED(HttpStatus.FORBIDDEN, "해당 파티 초대를 취소할 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

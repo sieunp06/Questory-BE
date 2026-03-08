@@ -28,4 +28,12 @@
             )
         </foreach>
     </insert>
+
+    <update id="updateStatusByInviter">
+        UPDATE party_invite
+        SET status = #{status}, responded_at = #{now}
+        WHERE invite_id = #{inviteId}
+            AND inviter_id = #{inviterId}
+            AND status = 'PENDING'
+    </update>
 </mapper>

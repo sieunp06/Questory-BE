@@ -3,20 +3,24 @@ package com.ssafy.questory.party.service;
 import com.ssafy.questory.common.exception.CustomException;
 import com.ssafy.questory.common.exception.ErrorCode;
 import com.ssafy.questory.member.domain.SecurityMember;
+import com.ssafy.questory.party.domain.PartyInviteStatus;
 import com.ssafy.questory.party.dto.request.InviteRequestDto;
 import com.ssafy.questory.party.dto.response.InviteResponsesDto;
+import com.ssafy.questory.party.repository.PartyInviteRepository;
 import com.ssafy.questory.party.repository.PartyMemberRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class PartyInviteService {
     private final PartyMemberRepository partyMemberRepository;
+    private final PartyInviteRepository partyInviteRepository;
     private final PartyInviteChunkService partyInviteChunkService;
 
     private static final int CHUNK_SIZE = 20;
@@ -52,5 +56,16 @@ public class PartyInviteService {
         return InviteResponsesDto.builder()
                 .results(results)
                 .build();
+    }
+
+    @Transactional
+    public void cancel(SecurityMember member, Long inviteId) {
+        Long inviterId = member.getMemberId();
+        int updated = partyInviteRepository.updateStatusByInviter(
+                inviteId, inviterId, PartyInviteStatus.CANCELED, LocalDateTime.now());
+
+        if (updated == 0) {
+            throw new CustomException(ErrorCode.PARTY_INVITE_CANCEL_NOT_ALLOWED);
+        }
     }
 }

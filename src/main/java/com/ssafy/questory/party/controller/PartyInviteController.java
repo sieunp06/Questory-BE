@@ -25,4 +25,12 @@ public class PartyInviteController {
             @Valid @RequestBody InviteRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(partyInviteService.invite(member, partyId, dto));
     }
+
+    @PatchMapping("/{inviteId}/cancel")
+    public ResponseEntity<ApiResponse<Void>> cancel(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long inviteId) {
+        partyInviteService.cancel(member, inviteId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("파티 초대를 취소했습니다."));
+    }
 }
