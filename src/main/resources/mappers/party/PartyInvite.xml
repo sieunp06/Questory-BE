@@ -9,4 +9,23 @@
         INSERT INTO party_invite (party_id, inviter_id, invitee_id, status, created_at)
         VALUES (#{partyId}, #{inviterId}, #{inviteeId}, #{status}, #{createdAt})
     </insert>
+    <insert id="bulkInsert">
+        INSERT INTO party_invite (
+            party_id,
+            inviter_id,
+            invitee_id,
+            status,
+            created_at
+        )
+        VALUES
+        <foreach collection="invites" item="invite" separator=",">
+            (
+                #{invite.partyId},
+                #{invite.inviterId},
+                #{invite.inviteeId},
+                #{invite.status},
+                #{invite.createdAt}
+            )
+        </foreach>
+    </insert>
 </mapper>
