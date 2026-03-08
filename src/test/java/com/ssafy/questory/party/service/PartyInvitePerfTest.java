@@ -33,6 +33,7 @@ class PartyInvitePerfTest {
     private static final long PARTY_ID = 1L;
     private static final long INVITER_ID = 1L;
     private static final int MAX_MEMBER_ID = 101;
+    private static final int CHUNK_SIZE = 15;
 
     @Autowired PartyInviteService partyInviteService;
     @Autowired JdbcTemplate jdbc;
@@ -45,19 +46,18 @@ class PartyInvitePerfTest {
         ensureMembers(MAX_MEMBER_ID);
         ensureParty(PARTY_ID, INVITER_ID);
         ensureOwner(PARTY_ID, INVITER_ID);
+        ensureFriends(INVITER_ID, MAX_MEMBER_ID - 1); // 2 ~ 101
     }
 
     @BeforeEach
     void beforeEach() {
         cleanupInvites(PARTY_ID, INVITER_ID);
-        cleanupFriends(INVITER_ID, MAX_MEMBER_ID);
         QueryCountHolder.clear();
     }
 
     @AfterEach
     void afterEach() {
         cleanupInvites(PARTY_ID, INVITER_ID);
-        cleanupFriends(INVITER_ID, MAX_MEMBER_ID);
     }
 
     @AfterAll
@@ -76,8 +76,6 @@ class PartyInvitePerfTest {
     @ParameterizedTest
     @ValueSource(ints = {10, 50, 100})
     void invite_perf(int n) {
-        ensureFriends(INVITER_ID, n);
-
         List<Long> inviteeIds = LongStream.rangeClosed(2, n + 1L).boxed().toList();
         InviteRequestDto dto = new InviteRequestDto(inviteeIds);
 
@@ -100,7 +98,8 @@ class PartyInvitePerfTest {
 
         assertThat(response.results()).hasSize(n);
 
-        assertThat(insert).isEqualTo(n);
+        long expectedMaxInsert = (n + CHUNK_SIZE - 1) / CHUNK_SIZE;
+        assertThat(insert).isLessThanOrEqualTo(expectedMaxInsert);
 
         rows.add(new ResultRow(n, select, insert, update, delete, total, elapsedMs));
 
@@ -150,8 +149,8 @@ class PartyInvitePerfTest {
             """, partyId, ownerId);
     }
 
-    private void ensureFriends(long inviterId, int n) {
-        List<Object[]> args = LongStream.rangeClosed(2, n + 1L)
+    private void ensureFriends(long inviterId, int count) {
+        List<Object[]> args = LongStream.rangeClosed(2, count + 1L)
                 .mapToObj(invitee -> new Object[]{inviterId, invitee})
                 .toList();
 
@@ -168,13 +167,6 @@ class PartyInvitePerfTest {
             DELETE FROM party_invite
             WHERE party_id = ? AND inviter_id = ?
             """, partyId, inviterId);
-    }
-
-    private void cleanupFriends(long inviterId, int maxInviteeId) {
-        jdbc.update("""
-            DELETE FROM friend
-            WHERE member_a_id = ? AND member_b_id BETWEEN 2 AND ?
-            """, inviterId, maxInviteeId);
     }
 
     private record ResultRow(

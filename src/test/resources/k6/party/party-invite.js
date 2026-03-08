@@ -8,14 +8,15 @@ const PARTY_ID = Number(__ENV.PARTY_ID || 1);
 const N = Number(__ENV.N || 10);
 const START_INVITEE_ID = Number(__ENV.START_INVITEE_ID || 2);
 
+const VUS = Number(__ENV.VUS || 10);
 const ITERATIONS = Number(__ENV.ITERATIONS || 20);
 
 export const options = {
   scenarios: {
     concurrent_check: {
       executor: 'per-vu-iterations',
-      vus: 30,
-      iterations: 20,
+      vus: VUS,
+      iterations: ITERATIONS,
       maxDuration: '10m',
     },
   },
