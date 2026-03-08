@@ -33,4 +33,21 @@ public class PartyInviteController {
         partyInviteService.cancel(member, inviteId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("파티 초대를 취소했습니다."));
     }
+
+    @PatchMapping("/{inviteId}/accept")
+    public ResponseEntity<ApiResponse<Void>> accept(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long inviteId) {
+        partyInviteService.accept(member, inviteId);
+        return ResponseEntity.ok(ApiResponse.ok("파티 초대를 수락했습니다."));
+    }
+
+    @PatchMapping("/{inviteId}/reject")
+    public ResponseEntity<ApiResponse<Void>> reject(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long inviteId
+    ) {
+        partyInviteService.reject(member, inviteId);
+        return ResponseEntity.ok(ApiResponse.ok("파티 초대를 거절했습니다."));
+    }
 }

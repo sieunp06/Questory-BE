@@ -52,7 +52,12 @@ public enum ErrorCode {
     FORBIDDEN_PARTY_CREATOR_ONLY(HttpStatus.FORBIDDEN, "파티 생성자만 수행할 수 있습니다."),
     PARTY_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 회원은 파티 멤버가 아닙니다."),
     PARTY_OWNER_CANNOT_LEAVE(HttpStatus.BAD_REQUEST, "방장은 파티를 탈퇴할 수 없습니다."),
-    PARTY_INVITE_CANCEL_NOT_ALLOWED(HttpStatus.FORBIDDEN, "해당 파티 초대를 취소할 수 없습니다.");
+    PARTY_INVITE_NOT_FOUND(HttpStatus.NOT_FOUND, "파티 초대를 찾을 수 없습니다."),
+    PARTY_INVITE_ALREADY_PROCESSED(HttpStatus.CONFLICT, "이미 처리된 파티 초대입니다."),
+    PARTY_INVITE_CANCEL_NOT_ALLOWED(HttpStatus.FORBIDDEN, "해당 파티 초대를 취소할 수 없습니다."),
+    PARTY_INVITE_ACCEPT_NOT_ALLOWED(HttpStatus.FORBIDDEN, "해당 파티 초대를 수락할 수 없습니다."),
+    PARTY_INVITE_REJECT_NOT_ALLOWED(HttpStatus.FORBIDDEN, "해당 파티 초대를 거절할 수 없습니다."),
+    ALREADY_PARTY_MEMBER(HttpStatus.CONFLICT, "이미 파티에 가입된 사용자입니다."),;
 
     private final HttpStatus status;
     private final String message;
