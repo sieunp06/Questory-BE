@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.party.repository.PartyInviteRepository">
+    <resultMap id="partyInviteResultMap" type="com.ssafy.questory.party.domain.PartyInvite">
+        <id property="inviteId" column="invite_id"/>
+        <result property="partyId" column="party_id"/>
+        <result property="inviterId" column="inviter_id"/>
+        <result property="inviteeId" column="invitee_id"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="respondedAt" column="responded_at"/>
+    </resultMap>
+
+    <insert id="insert"
+            parameterType="com.ssafy.questory.party.domain.PartyInvite"
+            useGeneratedKeys="true" keyProperty="inviteId">
+        INSERT INTO party_invite (party_id, inviter_id, invitee_id, status, created_at)
+        VALUES (#{partyId}, #{inviterId}, #{inviteeId}, #{status}, #{createdAt})
+    </insert>
+    <insert id="bulkInsert">
+        INSERT INTO party_invite (
+            party_id,
+            inviter_id,
+            invitee_id,
+            status,
+            created_at
+        )
+        VALUES
+        <foreach collection="invites" item="invite" separator=",">
+            (
+                #{invite.partyId},
+                #{invite.inviterId},
+                #{invite.inviteeId},
+                #{invite.status},
+                #{invite.createdAt}
+            )
+        </foreach>
+    </insert>
+
+    <select id="findByInviteId" resultMap="partyInviteResultMap">
+        SELECT invite_id, party_id, inviter_id, invitee_id, status, created_at, responded_at
+        FROM party_invite
+        WHERE invite_id = #{inviteId}
+    </select>
+
+    <update id="updateStatusByInviter">
+        UPDATE party_invite
+        SET status = #{status}, responded_at = #{now}
+        WHERE invite_id = #{inviteId}
+            AND inviter_id = #{inviterId}
+            AND status = 'PENDING'
+    </update>
+    <update id="updateStatusByInvitee">
+        UPDATE party_invite
+        SET status = #{status}, responded_at = #{now}
+        WHERE invite_id = #{inviteId}
+            AND invitee_id = #{inviteeId}
+            AND status = 'PENDING'
+    </update>
+</mapper>

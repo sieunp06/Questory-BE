@@ -138,3 +138,82 @@ CREATE TABLE friend_request (
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE party (
+    party_id    BIGINT NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(100) NOT NULL,
+    creator_id  BIGINT NOT NULL,
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (party_id),
+    KEY idx_party_creator (creator_id),
+
+    CONSTRAINT fk_party_creator
+        FOREIGN KEY (creator_id) REFERENCES member(member_id)
+            ON DELETE RESTRICT
+            ON UPDATE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE party_member (
+    party_id    BIGINT NOT NULL,
+    member_id   BIGINT NOT NULL,
+    role        ENUM('OWNER', 'MEMBER') NOT NULL DEFAULT 'MEMBER',
+    joined_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    owner_flag TINYINT GENERATED ALWAYS AS (CASE WHEN role = 'OWNER' THEN 1 ELSE NULL END) STORED,
+
+    PRIMARY KEY (party_id, member_id),
+    KEY idx_pm_member (member_id),
+    KEY idx_pm_party_role (party_id, role),
+
+    UNIQUE KEY uk_pm_one_owner_per_party (party_id, owner_flag),
+
+    CONSTRAINT fk_pm_party
+        FOREIGN KEY (party_id) REFERENCES party(party_id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE,
+
+    CONSTRAINT fk_pm_member
+        FOREIGN KEY (member_id) REFERENCES member(member_id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE party_invite (
+    invite_id       BIGINT NOT NULL AUTO_INCREMENT,
+    party_id        BIGINT NOT NULL,
+    inviter_id      BIGINT NOT NULL,
+    invitee_id      BIGINT NOT NULL,
+    status          ENUM('PENDING','ACCEPTED','REJECTED','CANCELED') NOT NULL DEFAULT 'PENDING',
+    created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    responded_at    DATETIME NULL,
+
+    pending_flag TINYINT GENERATED ALWAYS AS (
+        CASE WHEN status = 'PENDING' THEN 1 ELSE NULL END
+    ) STORED,
+
+    PRIMARY KEY (invite_id),
+    KEY idx_pi_party_status_created (party_id, status, created_at),
+    KEY idx_pi_invitee_status_created (invitee_id, status, created_at),
+
+    UNIQUE KEY uk_pi_party_invitee_pending (party_id, invitee_id, pending_flag),
+
+    CONSTRAINT fk_pi_party
+        FOREIGN KEY (party_id) REFERENCES party(party_id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE,
+
+    CONSTRAINT fk_pi_inviter
+        FOREIGN KEY (inviter_id) REFERENCES member(member_id),
+    CONSTRAINT fk_pi_invitee
+        FOREIGN KEY (invitee_id) REFERENCES member(member_id),
+
+    CONSTRAINT chk_pi_not_self CHECK (inviter_id <> invitee_id)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;

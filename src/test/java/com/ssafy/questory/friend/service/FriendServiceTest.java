@@ -30,7 +30,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.mock;
 
@@ -41,7 +42,8 @@ class FriendServiceTest {
     @Mock MemberRepository memberRepository;
     @Mock MemberAuthPolicy memberAuthPolicy;
 
-    @InjectMocks FriendService friendService;
+    @InjectMocks
+    FriendService friendService;
 
     private SecurityMember securityMemberWithId(long memberId) {
         SecurityMember sm = mock(SecurityMember.class);

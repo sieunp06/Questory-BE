@@ -77,19 +77,11 @@ mybatis:
 
 logging:
   level:
-    org.springframework.transaction.support: TRACE
-    org.springframework.transaction: TRACE
-    org.springframework.transaction.interceptor: TRACE
-
-    org.springframework.jdbc.support: TRACE
-    org.springframework.jdbc.datasource: TRACE
-
-    org.mybatis: DEBUG
-    org.mybatis.spring: DEBUG
-
     com.ssafy: TRACE
   pattern:
     console: "%d{HH:mm:ss} [%level] %c{36} %m%n"
+
+decorator.datasource.p6spy.enable-logging: true
 
 jwt:
   access:

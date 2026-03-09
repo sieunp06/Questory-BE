@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.party.repository.PartyMemberRepository">
+    <insert id="insert"
+            parameterType="com.ssafy.questory.party.domain.PartyMember"
+            useGeneratedKeys="true" keyProperty="partyId">
+        INSERT INTO party_member (party_id, member_id, role, joined_at)
+        VALUES (#{partyId}, #{memberId}, #{role}, #{joinedAt})
+    </insert>
+
+    <select id="findMembersByPartyId" resultType="com.ssafy.questory.party.dto.response.PartyMemberInfoDto">
+        SELECT
+            m.member_id     AS memberId,
+            m.email         AS email,
+            m.nickname      AS nickname,
+            pm.role         AS role,
+            pm.joined_at    AS joinedAt
+        FROM party_member pm
+        JOIN member m ON m.member_id = pm.member_id
+        WHERE pm.party_id = #{partyId}
+            AND m.status != 'SOFT_DELETE'
+        ORDER BY
+            CASE pm.role WHEN 'OWNER' THEN 0 ELSE 1 END,
+            pm.joined_at ASC
+    </select>
+    <select id="findExistingMemberIds" resultType="long">
+        SELECT member_id
+        FROM party_member
+        WHERE party_id = #{partyId}
+            AND member_id IN
+            <foreach collection="targets" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+    </select>
+
+    <select id="existsActiveMember" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM party_member
+            WHERE party_id = #{partyId}
+                AND member_id = #{memberId}
+        )
+    </select>
+    <select id="exists" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM party_member
+            WHERE party_id = #{partyId}
+                AND member_id = #{memberId}
+        )
+    </select>
+    <select id="isOwner" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM party_member
+            WHERE party_id = #{partyId}
+                AND member_id = #{memberId}
+                AND role = 'OWNER'
+        )
+    </select>
+    
+    <update id="demoteOwnerToMember">
+        UPDATE party_member
+        SET role = 'MEMBER'
+        WHERE party_id = #{partyId}
+            AND member_id = #{memberId}
+            AND role = 'OWNER'
+    </update>
+    <update id="promoteMemberToOwner">
+        UPDATE party_member
+        SET role = 'OWNER'
+        WHERE party_id = #{partyId}
+            AND member_id = #{memberId}
+            AND role = 'MEMBER'
+    </update>
+
+    <delete id="delete">
+        DELETE FROM party_member
+        WHERE party_id = #{partyId}
+            AND member_id = #{memberId}
+            AND role != 'OWNER'
+    </delete>
+</mapper>

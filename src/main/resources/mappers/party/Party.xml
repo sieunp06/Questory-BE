@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.party.repository.PartyRepository">
+    <insert id="insert"
+            parameterType="com.ssafy.questory.party.domain.Party"
+            useGeneratedKeys="true" keyProperty="partyId">
+        INSERT INTO party (name, creator_id, created_at)
+        VALUES (#{name}, #{creatorId}, #{createdAt})
+    </insert>
+
+    <select id="findByPartyId" resultType="com.ssafy.questory.party.domain.Party">
+        SELECT party_id AS partyId, name, creator_id AS creatorId, created_at AS createdAt, updated_at AS updatedAt
+        FROM party
+        WHERE party_id = #{partyId}
+    </select>
+    <select id="findMyParties" resultType="com.ssafy.questory.party.dto.response.PartyInfoDto">
+        SELECT
+            p.party_id      AS partyId,
+            p.name          AS name,
+            p.creator_id    AS creatorId,
+            pm.role         AS role,
+            pm.joined_at    AS joinedAt,
+            p.created_at    AS createdAt,
+            p.updated_at    AS updatedAt
+        FROM party_member pm
+        JOIN party p ON p.party_id = pm.party_id
+        WHERE pm.member_id = #{memberId}
+        ORDER BY pm.joined_at DESC
+    </select>
+
+    <update id="updateNameIfCreator">
+        UPDATE party
+        SET name = #{name}
+        WHERE party_id = #{partyId} AND creator_id = #{memberId}
+    </update>
+
+    <delete id="deleteIfCreator">
+        DELETE FROM party
+        WHERE party_id = #{partyId} AND creator_id = #{memberId}
+    </delete>
+</mapper>

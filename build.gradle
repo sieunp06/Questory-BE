@@ -76,6 +76,10 @@ dependencies {
 
 	// mail
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	// p6spy & datasource-proxy
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+	testImplementation "net.ttddyy:datasource-proxy:1.9"
 }
 
 tasks.named('test') {

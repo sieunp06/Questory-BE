@@ -62,11 +62,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers(
-                                "/api/member/register",
-                                "/api/member/login",
-                                "/api/email/send-verify",
-                                "/api/email/verify-code"
+                        .requireCsrfProtectionMatcher(request ->
+                                request.getRequestURI().equals("/api/member/refresh")
                         )
                 )
 

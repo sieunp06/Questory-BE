@@ -44,7 +44,20 @@ public enum ErrorCode {
     ALREADY_FRIEND(HttpStatus.BAD_REQUEST, "이미 친구입니다."),
     DUPLICATE_REQUEST(HttpStatus.CONFLICT, "중복된 친구 요청입니다."),
     FRIEND_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "친구 요청이 존재하지 않습니다."),
-    FRIEND_NOT_FOUND(HttpStatus.BAD_REQUEST, "친구가 아닙니다.");
+    FRIEND_NOT_FOUND(HttpStatus.BAD_REQUEST, "친구가 아닙니다."),
+
+    // Party
+    INVALID_PARTY_NAME(HttpStatus.BAD_REQUEST, "올바르지 않은 파티 이름입니다."),
+    PARTY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 파티는 존재하지 않습니다."),
+    FORBIDDEN_PARTY_CREATOR_ONLY(HttpStatus.FORBIDDEN, "파티 생성자만 수행할 수 있습니다."),
+    PARTY_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 회원은 파티 멤버가 아닙니다."),
+    PARTY_OWNER_CANNOT_LEAVE(HttpStatus.BAD_REQUEST, "방장은 파티를 탈퇴할 수 없습니다."),
+    PARTY_INVITE_NOT_FOUND(HttpStatus.NOT_FOUND, "파티 초대를 찾을 수 없습니다."),
+    PARTY_INVITE_ALREADY_PROCESSED(HttpStatus.CONFLICT, "이미 처리된 파티 초대입니다."),
+    PARTY_INVITE_CANCEL_NOT_ALLOWED(HttpStatus.FORBIDDEN, "해당 파티 초대를 취소할 수 없습니다."),
+    PARTY_INVITE_ACCEPT_NOT_ALLOWED(HttpStatus.FORBIDDEN, "해당 파티 초대를 수락할 수 없습니다."),
+    PARTY_INVITE_REJECT_NOT_ALLOWED(HttpStatus.FORBIDDEN, "해당 파티 초대를 거절할 수 없습니다."),
+    ALREADY_PARTY_MEMBER(HttpStatus.CONFLICT, "이미 파티에 가입된 사용자입니다."),;
 
     private final HttpStatus status;
     private final String message;

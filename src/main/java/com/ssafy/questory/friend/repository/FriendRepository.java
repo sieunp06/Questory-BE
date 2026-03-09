@@ -8,6 +8,7 @@ import java.util.List;
 @Mapper
 public interface FriendRepository {
     List<FriendListRawDto> findFriendsRawByMemberId(Long memberId);
+    List<Long> findFriendIdsAmong(Long inviterId, List<Long> targets);
 
     boolean existsFriend(Long senderId, Long receiverId);
 
