@@ -1,10 +1,10 @@
-package com.ssafy.questory.security.config.jwt;
+package com.ssafy.questory.auth.config.jwt;
 
 import com.ssafy.questory.member.domain.MemberStatus;
 import com.ssafy.questory.member.domain.SecurityMember;
 import com.ssafy.questory.member.dto.security.LoginPrincipalRow;
 import com.ssafy.questory.member.repository.MemberRepository;
-import com.ssafy.questory.security.config.MemberAuthPolicy;
+import com.ssafy.questory.auth.config.MemberAuthPolicy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

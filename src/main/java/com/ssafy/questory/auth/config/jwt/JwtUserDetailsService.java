@@ -1,9 +1,9 @@
-package com.ssafy.questory.security.config.jwt;
+package com.ssafy.questory.auth.config.jwt;
 
 import com.ssafy.questory.member.domain.Member;
 import com.ssafy.questory.member.domain.SecurityMember;
 import com.ssafy.questory.member.repository.MemberRepository;
-import com.ssafy.questory.security.config.MemberAuthPolicy;
+import com.ssafy.questory.auth.config.MemberAuthPolicy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

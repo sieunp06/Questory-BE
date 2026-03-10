@@ -1,4 +1,4 @@
-package com.ssafy.questory.security.config.jwt;
+package com.ssafy.questory.auth.config.jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

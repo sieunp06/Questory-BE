@@ -1,8 +1,8 @@
 package com.ssafy.questory.support;
 
-import com.ssafy.questory.security.config.SecurityConfig;
-import com.ssafy.questory.security.config.jwt.JwtAuthenticationEntryPoint;
-import com.ssafy.questory.security.config.jwt.JwtAuthenticationFilter;
+import com.ssafy.questory.auth.config.SecurityConfig;
+import com.ssafy.questory.auth.config.jwt.JwtAuthenticationEntryPoint;
+import com.ssafy.questory.auth.config.jwt.JwtAuthenticationFilter;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

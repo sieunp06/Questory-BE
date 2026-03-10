@@ -1,4 +1,4 @@
-package com.ssafy.questory.security.config;
+package com.ssafy.questory.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

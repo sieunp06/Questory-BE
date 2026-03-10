@@ -1,11 +1,11 @@
-package com.ssafy.questory.security.config;
+package com.ssafy.questory.auth.config;
 
+import com.ssafy.questory.auth.config.jwt.JwtAuthenticationEntryPoint;
+import com.ssafy.questory.auth.config.jwt.JwtAuthenticationFilter;
 import com.ssafy.questory.auth.oauth2.OAuth2FailureHandler;
 import com.ssafy.questory.auth.oauth2.OAuth2SuccessHandler;
 import com.ssafy.questory.auth.service.CustomOAuth2UserService;
 import com.ssafy.questory.auth.service.CustomOidcUserService;
-import com.ssafy.questory.security.config.jwt.JwtAuthenticationEntryPoint;
-import com.ssafy.questory.security.config.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,9 +50,9 @@ public class SecurityConfig {
 
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(u -> u
-                                .userService(customOAuth2UserService)
-                                .oidcUserService(customOidcUserService)
-                                )
+                                        .userService(customOAuth2UserService)
+                                        .oidcUserService(customOidcUserService)
+                        )
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler(oAuth2FailureHandler))
 
