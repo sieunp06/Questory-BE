@@ -14,7 +14,7 @@ import com.ssafy.questory.member.domain.Member;
 import com.ssafy.questory.member.domain.MemberStatus;
 import com.ssafy.questory.member.domain.SecurityMember;
 import com.ssafy.questory.member.repository.MemberRepository;
-import com.ssafy.questory.security.config.MemberAuthPolicy;
+import com.ssafy.questory.auth.config.MemberAuthPolicy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.ssafy.questory.security.config.jwt;
+package com.ssafy.questory.auth.config.jwt;
 
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;

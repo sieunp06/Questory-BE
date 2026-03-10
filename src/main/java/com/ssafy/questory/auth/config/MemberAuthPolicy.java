@@ -1,4 +1,4 @@
-package com.ssafy.questory.security.config;
+package com.ssafy.questory.auth.config;
 
 import com.ssafy.questory.member.domain.MemberStatus;
 import org.springframework.security.authentication.DisabledException;

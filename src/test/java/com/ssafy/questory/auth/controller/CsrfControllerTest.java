@@ -1,7 +1,7 @@
-package com.ssafy.questory.security.controller;
+package com.ssafy.questory.auth.controller;
 
-import com.ssafy.questory.security.config.SecurityConfig;
-import com.ssafy.questory.security.config.jwt.JwtAuthenticationFilter;
+import com.ssafy.questory.auth.config.SecurityConfig;
+import com.ssafy.questory.auth.config.jwt.JwtAuthenticationFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

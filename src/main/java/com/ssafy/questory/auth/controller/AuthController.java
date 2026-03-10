@@ -20,7 +20,7 @@ public class AuthController {
 
     @PostMapping("/exchange")
     public ResponseEntity<ApiResponse<Void>> exchange(@Valid @RequestBody TicketExchangeRequestDto dto) {
-        String accessToken = authService.exchangeTicket(dto.ticket());
+        String accessToken = authService.exchangeTicket(dto);
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .body(ApiResponse.ok("Access Token 발급에 성공했습니다."));

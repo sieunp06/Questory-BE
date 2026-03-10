@@ -1,4 +1,4 @@
-package com.ssafy.questory.security.controller;
+package com.ssafy.questory.auth.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.web.csrf.CsrfToken;

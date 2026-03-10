@@ -11,6 +11,10 @@
 
 === 1. Ticket Exchange
 
+OAuth2 로그인 성공 후 발급된 일회용 ticket을 Access Token으로 교환합니다.
+
+PKCE가 적용된 OAuth2 로그인인 경우 `code_verifier`를 함께 전달해야 합니다.
+
 ==== 1-1. exchange 성공 (200)
 
 operation::auth-exchange[snippets='http-request,http-response,request-fields,response-headers,response-fields']
@@ -18,6 +22,7 @@ operation::auth-exchange[snippets='http-request,http-response,request-fields,res
 ==== 1-2. exchange 실패 (400 - Validation)
 
 operation::auth-exchange-400[snippets='http-request,http-response,request-fields,response-fields']
+
 
 === 2. OAuth2 Social Login
 
