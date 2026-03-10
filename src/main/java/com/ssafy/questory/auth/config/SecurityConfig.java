@@ -1,11 +1,11 @@
 package com.ssafy.questory.auth.config;
 
-import com.ssafy.questory.auth.config.jwt.JwtAuthenticationEntryPoint;
-import com.ssafy.questory.auth.config.jwt.JwtAuthenticationFilter;
 import com.ssafy.questory.auth.oauth2.OAuth2FailureHandler;
 import com.ssafy.questory.auth.oauth2.OAuth2SuccessHandler;
 import com.ssafy.questory.auth.service.CustomOAuth2UserService;
 import com.ssafy.questory.auth.service.CustomOidcUserService;
+import com.ssafy.questory.auth.config.jwt.JwtAuthenticationEntryPoint;
+import com.ssafy.questory.auth.config.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -35,6 +36,7 @@ public class SecurityConfig {
     private final CustomOidcUserService customOidcUserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
+    private final OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -49,6 +51,9 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
 
                 .oauth2Login(oauth -> oauth
+                        .authorizationEndpoint(a -> a
+                                .authorizationRequestResolver(customAuthorizationRequestResolver)
+                        )
                         .userInfoEndpoint(u -> u
                                         .userService(customOAuth2UserService)
                                         .oidcUserService(customOidcUserService)

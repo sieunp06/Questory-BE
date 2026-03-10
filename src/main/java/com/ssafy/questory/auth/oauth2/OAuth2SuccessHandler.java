@@ -1,6 +1,7 @@
 package com.ssafy.questory.auth.oauth2;
 
 import com.ssafy.questory.auth.domain.LoginPrincipal;
+import com.ssafy.questory.auth.ticket.PkceChallengeStore;
 import com.ssafy.questory.auth.ticket.TicketPayload;
 import com.ssafy.questory.auth.ticket.TicketStore;
 import com.ssafy.questory.common.exception.CustomException;
@@ -19,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
@@ -30,6 +32,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final JwtService jwtService;
     private final JwtUserDetailsService jwtUserDetailsService;
     private final TicketStore ticketStore;
+    private final PkceChallengeStore pkceChallengeStore;
 
     @Value("${app.oauth2.redirect-uri}")
     private String redirectUri;
@@ -49,11 +52,21 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             email = loginPrincipal.getEmail();
         } else if (principal instanceof OidcUser oidcUser) {
             Object mid = oidcUser.getClaims().get("memberId");
-            if (mid == null) throw new CustomException(ErrorCode.UNAUTHORIZED);
+            if (mid == null) {
+                throw new CustomException(ErrorCode.UNAUTHORIZED);
+            }
             memberId = Long.valueOf(String.valueOf(mid));
             email = oidcUser.getEmail();
         } else {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String state = request.getParameter("state");
+        String codeChallenge = null;
+
+        if (StringUtils.hasText(state)) {
+            codeChallenge = pkceChallengeStore.get(state);
+            pkceChallengeStore.remove(state);
         }
 
         UserDetails userDetails = jwtUserDetailsService.loadUserByEmail(email);
@@ -67,7 +80,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        String ticket = ticketStore.issue(new TicketPayload(memberId, email));
+        String ticket = ticketStore.issue(new TicketPayload(memberId, email, codeChallenge));
 
         String redirectUrl = UriComponentsBuilder
                 .fromUriString(redirectUri)
