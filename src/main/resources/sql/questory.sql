@@ -217,3 +217,91 @@ CREATE TABLE party_invite (
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE trip (
+    trip_id     BIGINT NOT NULL AUTO_INCREMENT,
+    party_id    BIGINT NOT NULL,
+    creator_id  BIGINT NOT NULL,
+    title       VARCHAR(100) NOT NULL,
+    description VARCHAR(1000) NULL,
+    start_date  DATE NOT NULL,
+    end_date    DATE NOT NULL,
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (trip_id),
+
+    CONSTRAINT fk_trip_party
+        FOREIGN KEY (party_id) REFERENCES party(party_id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE,
+
+    CONSTRAINT fk_trip_creator
+        FOREIGN KEY (creator_id) REFERENCES member(member_id)
+            ON DELETE RESTRICT
+            ON UPDATE CASCADE,
+
+    CONSTRAINT chk_trip_date_range
+        CHECK (start_date <= end_date)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE trip_day (
+    trip_day_id BIGINT NOT NULL AUTO_INCREMENT,
+    trip_id     BIGINT NOT NULL,
+    day_num     INT NOT NULL,
+    trip_date   DATE NOT NULL,
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (trip_day_id),
+
+    UNIQUE KEY uk_trip_day_trip_day_num (trip_id, day_num),
+    UNIQUE KEY uk_trip_day_trip_date (trip_id, trip_date),
+
+    KEY idx_trip_day_trip_id (trip_id),
+
+    CONSTRAINT fk_trip_day_trip_id
+        FOREIGN KEY (trip_id)
+            REFERENCES trip (trip_id)
+                ON DELETE CASCADE
+                ON UPDATE CASCADE,
+    CONSTRAINT chk_trip_day_num
+        CHECK (day_num >= 1)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE trip_schedule (
+    trip_schedule_id    BIGINT NOT NULL AUTO_INCREMENT,
+    trip_day_id         BIGINT NOT NULL,
+    attraction_no       INT NULL,
+    title               VARCHAR(100) NOT NULL,
+    memo                VARCHAR(1000) NULL,
+    sort_order          INT NOT NULL,
+    created_by          BIGINT NOT NULL,
+    created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (trip_schedule_id),
+
+    KEY idx_trip_schedule_trip_day_id (trip_day_id),
+    KEY idx_trip_schedule_attraction_no (attraction_no),
+
+    UNIQUE KEY uk_trip_schedule_day_sort_order (trip_day_id, sort_order),
+
+    CONSTRAINT fk_trip_schedule_trip_day_id
+        FOREIGN KEY (trip_day_id)
+            REFERENCES trip_day (trip_day_id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE,
+    CONSTRAINT fk_trip_schedule_attraction_no
+        FOREIGN KEY (attraction_no)
+            REFERENCES attractions (no)
+            ON DELETE SET NULL
+            ON UPDATE CASCADE,
+    CONSTRAINT chk_trip_schedule_sort_order
+        CHECK (sort_order >= 1)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
