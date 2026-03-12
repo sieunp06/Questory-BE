@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.trip.repository.TripListRepository">
+    <select id="existsPartyMember" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM party_member
+            WHERE party_id = #{partyId}
+                AND member_id = #{memberId}
+        )
+    </select>
+
+    <select id="findTripsByPartyId"
+            resultType="com.ssafy.questory.trip.dto.response.TripSummaryResponseDto">
+        SELECT  t.trip_id      AS tripId,
+                t.title        AS title,
+                t.description  AS description,
+                t.start_date   AS startDate,
+                t.end_date     AS endDate,
+                t.creator_id   AS creatorId
+        FROM trip t
+        WHERE t.party_id = #{partyId}
+        ORDER BY t.start_date ASC, t.end_date ASC, t.trip_id ASC
+    </select>
+
+    <select id="findTripDetailRows"
+            resultType="com.ssafy.questory.trip.dto.row.TripDetailRow">
+        SELECT
+            t.trip_id                    AS tripId,
+            t.party_id                   AS partyId,
+            t.creator_id                 AS creatorId,
+            t.title                      AS title,
+            t.description                AS description,
+            t.start_date                 AS startDate,
+            t.end_date                   AS endDate,
+
+            td.trip_day_id               AS tripDayId,
+            td.day_num                   AS dayNum,
+            td.trip_date                 AS tripDate,
+
+            ts.trip_schedule_id          AS tripScheduleId,
+            ts.attraction_no             AS attractionNo,
+            ts.title                     AS scheduleTitle,
+            ts.memo                      AS memo,
+            ts.sort_order                AS sortOrder,
+            ts.created_by                AS createdBy
+        FROM trip t
+        LEFT JOIN trip_day td ON td.trip_id = t.trip_id
+        LEFT JOIN trip_schedule ts ON ts.trip_day_id = td.trip_day_id
+        WHERE t.party_id = #{partyId}
+            AND t.trip_id = #{tripId}
+        ORDER BY td.day_num ASC, ts.sort_order ASC, ts.trip_schedule_id ASC
+    </select>
+</mapper>
