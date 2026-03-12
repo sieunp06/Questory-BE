@@ -12,7 +12,6 @@ public record CreateResponseDto(
 
         String title,
 
-
         String description,
 
         @JsonProperty("start_date")
