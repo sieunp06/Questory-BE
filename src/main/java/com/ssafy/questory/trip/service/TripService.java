@@ -62,6 +62,23 @@ public class TripService {
                 .build();
     }
 
+    public void delete(SecurityMember member, Long tripId) {
+        Trip trip = tripRepository.findById(tripId);
+        if (trip == null) {
+            throw new CustomException(ErrorCode.TRIP_NOT_FOUND);
+        }
+
+        Long memberId = member.getMemberId();
+        if (!trip.getCreatorId().equals(memberId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_PARTY_CREATOR_ONLY);
+        }
+
+        int deleted = tripRepository.deleteById(tripId);
+        if (deleted == 0) {
+            throw new CustomException(ErrorCode.TRIP_NOT_FOUND);
+        }
+    }
+
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);

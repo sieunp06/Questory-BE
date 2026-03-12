@@ -26,4 +26,9 @@
                 end_date = #{endDate}
         WHERE trip_id = #{tripId}
     </update>
+
+    <delete id="deleteById">
+        DELETE FROM trip
+        WHERE trip_id = #{tripId}
+    </delete>
 </mapper>

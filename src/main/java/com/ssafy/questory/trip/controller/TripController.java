@@ -36,4 +36,12 @@ public class TripController {
         tripUpdateService.updateInfo(member, tripId, dto);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("여행 기본 정보 수정에 성공했습니다."));
     }
+
+    @DeleteMapping("/{tripId}")
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @AuthenticationPrincipal SecurityMember member,
+            @PathVariable Long tripId) {
+        tripService.delete(member, tripId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok("여행 삭제에 성공했습니다."));
+    }
 }

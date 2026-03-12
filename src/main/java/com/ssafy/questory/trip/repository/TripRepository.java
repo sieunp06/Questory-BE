@@ -10,4 +10,6 @@ public interface TripRepository {
     void insert(Trip trip);
 
     void updateInfo(Trip update);
+
+    int deleteById(Long tripId);
 }
