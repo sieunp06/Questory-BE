@@ -80,6 +80,9 @@ dependencies {
 	// p6spy & datasource-proxy
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 	testImplementation "net.ttddyy:datasource-proxy:1.9"
+
+	// WebSocket
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
 tasks.named('test') {
