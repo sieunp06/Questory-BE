@@ -78,6 +78,8 @@ mybatis:
 logging:
   level:
     com.ssafy: TRACE
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: TRACE
   pattern:
     console: "%d{HH:mm:ss} [%level] %c{36} %m%n"
 
