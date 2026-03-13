@@ -99,7 +99,7 @@ public class PartyService {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
-        if (!partyMemberRepository.existsActiveMember(partyId, newOwnerId)) {
+        if (!partyMemberRepository.exists(partyId, newOwnerId)) {
             throw new CustomException(ErrorCode.PARTY_MEMBER_NOT_FOUND);
         }
 

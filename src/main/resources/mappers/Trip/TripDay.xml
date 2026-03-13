@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.trip.repository.TripDayRepository">
+    <select id="findByTripId" resultType="com.ssafy.questory.trip.domain.TripDay">
+        SELECT trip_day_id, trip_id, day_num, trip_date, created_at
+        FROM trip_day
+        WHERE trip_id = #{tripId}
+        ORDER BY day_num ASC
+    </select>
+
+    <insert id="bulkInsert">
+        INSERT INTO trip_day (trip_id, day_num, trip_date)
+        VALUES
+            <foreach collection="dates" item="date" index="idx" separator=",">
+                (#{tripId}, #{idx} + 1, #{date})
+            </foreach>
+    </insert>
+
+    <delete id="deleteByTripId">
+        DELETE FROM trip_day
+        WHERE trip_id = #{tripId}
+    </delete>
+</mapper>

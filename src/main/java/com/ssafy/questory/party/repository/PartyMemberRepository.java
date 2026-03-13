@@ -13,7 +13,6 @@ public interface PartyMemberRepository {
     List<PartyMemberInfoDto> findMembersByPartyId(Long partyId);
     List<Long> findExistingMemberIds(Long partyId, List<Long> targets);
 
-    boolean existsActiveMember(Long partyId, Long memberId);
     boolean exists(Long partyId, Long memberId);
 
     boolean isOwner(Long partyId, Long memberId);

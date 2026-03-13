@@ -35,14 +35,6 @@
             </foreach>
     </select>
 
-    <select id="existsActiveMember" resultType="boolean">
-        SELECT EXISTS(
-            SELECT 1
-            FROM party_member
-            WHERE party_id = #{partyId}
-                AND member_id = #{memberId}
-        )
-    </select>
     <select id="exists" resultType="boolean">
         SELECT EXISTS(
             SELECT 1

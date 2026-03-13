@@ -57,7 +57,10 @@ public enum ErrorCode {
     PARTY_INVITE_CANCEL_NOT_ALLOWED(HttpStatus.FORBIDDEN, "해당 파티 초대를 취소할 수 없습니다."),
     PARTY_INVITE_ACCEPT_NOT_ALLOWED(HttpStatus.FORBIDDEN, "해당 파티 초대를 수락할 수 없습니다."),
     PARTY_INVITE_REJECT_NOT_ALLOWED(HttpStatus.FORBIDDEN, "해당 파티 초대를 거절할 수 없습니다."),
-    ALREADY_PARTY_MEMBER(HttpStatus.CONFLICT, "이미 파티에 가입된 사용자입니다."),;
+    ALREADY_PARTY_MEMBER(HttpStatus.CONFLICT, "이미 파티에 가입된 사용자입니다."),
+
+    // Trip
+    TRIP_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 여행은 존재하지 않습니다.");
 
     private final HttpStatus status;
     private final String message;

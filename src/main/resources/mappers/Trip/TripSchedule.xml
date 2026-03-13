@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.questory.trip.repository.TripScheduleRepository">
+    <select id="findSnapshotsByTripId" resultType="com.ssafy.questory.trip.domain.TripScheduleSnapshot">
+        SELECT  ts.trip_schedule_id,
+                ts.trip_day_id AS oldTripDayId,
+                td.trip_date   AS oldTripDate,
+                ts.attraction_no,
+                ts.title,
+                ts.memo,
+                ts.sort_order,
+                ts.created_by
+        FROM trip_schedule ts
+        JOIN trip_day td ON td.trip_day_id = ts.trip_day_id
+        WHERE td.trip_id = #{tripId}
+        ORDER BY td.trip_date ASC, ts.sort_order ASC, ts.trip_schedule_id ASC
+    </select>
+
+    <insert id="bulkInsert">
+        INSERT INTO trip_schedule (trip_day_id, attraction_no, title, memo, sort_order, created_by)
+        VALUES
+            <foreach collection="commands" item="cmd" separator=",">
+                (
+                    #{cmd.tripDayId},
+                    #{cmd.attractionNo},
+                    #{cmd.title},
+                    #{cmd.memo},
+                    #{cmd.sortOrder},
+                    #{cmd.createdBy}
+                )
+            </foreach>
+    </insert>
+</mapper>
