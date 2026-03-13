@@ -10,11 +10,14 @@ import java.util.List;
 @Mapper
 public interface TripScheduleRepository {
     List<TripScheduleSnapshot> findSnapshotsByTripId(Long tripId);
+    TripScheduleSnapshot findSnapshot(Long tripId, Long tripScheduleId);
     Integer findNextSortOrder(Long tripDayId);
     TripScheduleWsDto findWsDtoById(Long tripScheduleId);
 
     boolean existsTripDayInTrip(Long tripId, Long tripDayId);
-
     void bulkInsert(List<TripScheduleInsertCommand> commands);
+
     void insert(TripScheduleInsertCommand insertCommand);
+
+    void updateMemo(Long tripScheduleId, String memo);
 }

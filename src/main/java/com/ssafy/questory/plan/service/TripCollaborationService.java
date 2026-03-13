@@ -7,7 +7,9 @@ import com.ssafy.questory.plan.dto.command.TripEditCommand;
 import com.ssafy.questory.plan.dto.event.TripChangedAfterCommitEvent;
 import com.ssafy.questory.plan.dto.event.TripChangedEvent;
 import com.ssafy.questory.plan.dto.payload.AddSchedulePayload;
+import com.ssafy.questory.plan.dto.payload.UpdateMemoPayload;
 import com.ssafy.questory.plan.dto.ws.TripScheduleWsDto;
+import com.ssafy.questory.trip.domain.TripScheduleSnapshot;
 import com.ssafy.questory.trip.repository.TripPermissionRepository;
 import com.ssafy.questory.trip.domain.TripScheduleInsertCommand;
 import com.ssafy.questory.trip.repository.TripRepository;
@@ -65,6 +67,35 @@ public class TripCollaborationService {
                 .clientRequestId(command.getClientRequestId())
                 .occurredAt(LocalDateTime.now())
                 .payload(created)
+                .build());
+    }
+
+    @Transactional
+    public void updateMemo(Long tripId, Principal principal, TripEditCommand<UpdateMemoPayload> command) {
+        Long memberId = extractMemberId(principal);
+        validateParticipant(tripId, memberId);
+        validateRevision(tripId, command.getBaseRevision());
+
+        UpdateMemoPayload payload = command.getPayload();
+
+        TripScheduleSnapshot snapshot = tripScheduleRepository.findSnapshot(tripId, payload.getTripScheduleId());
+        if (snapshot == null) {
+            throw new CustomException(ErrorCode.TRIP_SCHEDULE_NOT_FOUND);
+        }
+
+        tripScheduleRepository.updateMemo(payload.getTripScheduleId(), payload.getMemo());
+
+        TripScheduleWsDto changed = tripScheduleRepository.findWsDtoById(payload.getTripScheduleId());
+        Long newRevision = tripRepository.increaseRevision(tripId);
+
+        publishAfterCommit(tripId, TripChangedEvent.builder()
+                .eventType("SCHEDULE_UPDATED")
+                .tripId(tripId)
+                .revision(newRevision)
+                .actorMemberId(memberId)
+                .clientRequestId(command.getClientRequestId())
+                .occurredAt(LocalDateTime.now())
+                .payload(changed)
                 .build());
     }
 

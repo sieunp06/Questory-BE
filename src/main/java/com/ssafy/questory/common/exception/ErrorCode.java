@@ -63,7 +63,8 @@ public enum ErrorCode {
     TRIP_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 여행은 존재하지 않습니다."),
     TRIP_REVISION_CONFLICT(HttpStatus.CONFLICT, "다른 사용자의 변경이 먼저 반영되었습니다."),
     TRIP_DAY_NOT_FOUND(HttpStatus.NOT_FOUND, "여행 날짜를 찾을 수 없습니다."),
-    TRIP_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 여행에 접근할 권한이 없습니다.");
+    TRIP_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 여행에 접근할 권한이 없습니다."),
+    TRIP_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "여행 일정을 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;
