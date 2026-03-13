@@ -1,18 +1,15 @@
-package com.ssafy.questory.trip.domain;
+package com.ssafy.questory.plan.dto.ws;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Builder
-public class TripScheduleInsertCommand {
+public class TripScheduleWsDto {
     private Long tripScheduleId;
     private Long tripDayId;
     private Integer attractionNo;
     private String title;
     private String memo;
     private Integer sortOrder;
-    private Long createdBy;
 }

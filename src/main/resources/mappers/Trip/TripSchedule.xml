@@ -3,6 +3,16 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.questory.trip.repository.TripScheduleRepository">
+    <resultMap id="TripScheduleWsDtoMap"
+               type="com.ssafy.questory.plan.dto.ws.TripScheduleWsDto">
+        <id property="tripScheduleId" column="trip_schedule_id"/>
+        <result property="tripDayId" column="trip_day_id"/>
+        <result property="attractionNo" column="attraction_no"/>
+        <result property="title" column="title"/>
+        <result property="memo" column="memo"/>
+        <result property="sortOrder" column="sort_order"/>
+    </resultMap>
+
     <select id="findSnapshotsByTripId" resultType="com.ssafy.questory.trip.domain.TripScheduleSnapshot">
         SELECT  ts.trip_schedule_id,
                 ts.trip_day_id AS oldTripDayId,
@@ -16,6 +26,25 @@
         JOIN trip_day td ON td.trip_day_id = ts.trip_day_id
         WHERE td.trip_id = #{tripId}
         ORDER BY td.trip_date ASC, ts.sort_order ASC, ts.trip_schedule_id ASC
+    </select>
+    <select id="findNextSortOrder" resultType="int">
+        SELECT COALESCE(MAX(sort_order), 0) + 1
+        FROM trip_schedule
+        WHERE trip_day_id = #{tripDayId}
+    </select>
+    <select id="findWsDtoById" resultMap="TripScheduleWsDtoMap">
+        SELECT trip_schedule_id, trip_day_id, attraction_no, title, memo, sort_order
+        FROM trip_schedule
+        WHERE trip_schedule_id = #{tripScheduleId}
+    </select>
+
+    <select id="existsTripDayInTrip" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM trip_day
+            WHERE trip_day_id = #{tripDayId}
+                AND trip_id = #{tripId}
+        )
     </select>
 
     <insert id="bulkInsert">
@@ -31,5 +60,12 @@
                     #{cmd.createdBy}
                 )
             </foreach>
+    </insert>
+    <insert id="insert"
+            parameterType="com.ssafy.questory.trip.domain.TripScheduleInsertCommand"
+            useGeneratedKeys="true"
+            keyProperty="tripScheduleId">
+        INSERT INTO trip_schedule (trip_day_id, attraction_no, title, memo, sort_order, created_by )
+        VALUES (#{tripDayId}, #{attractionNo}, #{title}, #{memo}, #{sortOrder}, #{createdBy} )
     </insert>
 </mapper>

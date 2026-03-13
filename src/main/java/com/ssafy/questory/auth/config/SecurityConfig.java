@@ -79,6 +79,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/docs/**",
                                 "/error",
+                                "/ws/**",
                                 "/api/csrf",
                                 "/api/member/register",
                                 "/api/member/login",
