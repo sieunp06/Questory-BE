@@ -1,9 +1,8 @@
-package com.ssafy.questory.trip;
+package com.ssafy.questory.trip.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.questory.member.domain.SecurityMember;
 import com.ssafy.questory.support.NoSecurityWebMvcTest;
-import com.ssafy.questory.trip.controller.TripController;
 import com.ssafy.questory.trip.dto.request.CreateRequestDto;
 import com.ssafy.questory.trip.dto.request.UpdateRequestDto;
 import com.ssafy.questory.trip.dto.response.CreateResponseDto;

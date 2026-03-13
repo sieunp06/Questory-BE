@@ -1,8 +1,7 @@
-package com.ssafy.questory.trip;
+package com.ssafy.questory.trip.controller;
 
 import com.ssafy.questory.member.domain.SecurityMember;
 import com.ssafy.questory.support.NoSecurityWebMvcTest;
-import com.ssafy.questory.trip.controller.TripListController;
 import com.ssafy.questory.trip.dto.response.TripDetailResponseDto;
 import com.ssafy.questory.trip.dto.response.TripSummaryResponseDto;
 import com.ssafy.questory.trip.service.TripListService;
