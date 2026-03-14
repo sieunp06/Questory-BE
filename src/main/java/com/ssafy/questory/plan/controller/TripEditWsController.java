@@ -2,6 +2,7 @@ package com.ssafy.questory.plan.controller;
 
 import com.ssafy.questory.plan.dto.command.TripEditCommand;
 import com.ssafy.questory.plan.dto.payload.AddSchedulePayload;
+import com.ssafy.questory.plan.dto.payload.DeleteSchedulePayload;
 import com.ssafy.questory.plan.dto.payload.UpdateMemoPayload;
 import com.ssafy.questory.plan.service.TripCollaborationService;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +18,10 @@ public class TripEditWsController {
     private final TripCollaborationService tripCollaborationService;
 
     @MessageMapping("/trips/{tripId}/schedule/add")
-    public void addSchedule(@DestinationVariable Long tripId,
+    public void addS(@DestinationVariable Long tripId,
                             Principal principal,
                             TripEditCommand<AddSchedulePayload> command) {
-        tripCollaborationService.addSchedule(tripId, principal, command);
+        tripCollaborationService.add(tripId, principal, command);
     }
 
     @MessageMapping("/trips/{tripId}/schedule/update-memo")
@@ -28,5 +29,12 @@ public class TripEditWsController {
                            Principal principal,
                            TripEditCommand<UpdateMemoPayload> command) {
         tripCollaborationService.updateMemo(tripId, principal, command);
+    }
+
+    @MessageMapping("/trips/{tripId}/schedule/delete")
+    public void deleteSchedule(@DestinationVariable Long tripId,
+                               Principal principal,
+                               TripEditCommand<DeleteSchedulePayload> command) {
+        tripCollaborationService.delete(tripId, principal, command);
     }
 }

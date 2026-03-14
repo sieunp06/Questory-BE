@@ -20,4 +20,7 @@ public interface TripScheduleRepository {
     void insert(TripScheduleInsertCommand insertCommand);
 
     void updateMemo(Long tripScheduleId, String memo);
+    void decreaseSortOrdersAfterDelete(Long oldTripDayId, Integer sortOrder);
+
+    void deleteById(Long tripScheduleId);
 }

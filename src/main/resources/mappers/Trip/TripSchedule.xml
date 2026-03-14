@@ -91,4 +91,15 @@
         updated_at = NOW()
         WHERE trip_schedule_id = #{tripScheduleId}
     </update>
+    <update id="decreaseSortOrdersAfterDelete">
+        UPDATE trip_schedule
+        SET sort_order = sort_order - 1
+        WHERE trip_day_id = #{oldTripDayId}
+            AND sort_order > #{sortOrder}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM trip_schedule
+        WHERE trip_schedule_id = #{tripScheduleId}
+    </delete>
 </mapper>

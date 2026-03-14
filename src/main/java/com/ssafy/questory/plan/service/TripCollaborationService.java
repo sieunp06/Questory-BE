@@ -7,11 +7,12 @@ import com.ssafy.questory.plan.dto.command.TripEditCommand;
 import com.ssafy.questory.plan.dto.event.TripChangedAfterCommitEvent;
 import com.ssafy.questory.plan.dto.event.TripChangedEvent;
 import com.ssafy.questory.plan.dto.payload.AddSchedulePayload;
+import com.ssafy.questory.plan.dto.payload.DeleteSchedulePayload;
 import com.ssafy.questory.plan.dto.payload.UpdateMemoPayload;
 import com.ssafy.questory.plan.dto.ws.TripScheduleWsDto;
+import com.ssafy.questory.trip.domain.TripScheduleInsertCommand;
 import com.ssafy.questory.trip.domain.TripScheduleSnapshot;
 import com.ssafy.questory.trip.repository.TripPermissionRepository;
-import com.ssafy.questory.trip.domain.TripScheduleInsertCommand;
 import com.ssafy.questory.trip.repository.TripRepository;
 import com.ssafy.questory.trip.repository.TripScheduleRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -34,7 +36,7 @@ public class TripCollaborationService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public void addSchedule(Long tripId, Principal principal, TripEditCommand<AddSchedulePayload> command) {
+    public void add(Long tripId, Principal principal, TripEditCommand<AddSchedulePayload> command) {
         Long memberId = extractMemberId(principal);
 
         validateParticipant(tripId, memberId);
@@ -96,6 +98,38 @@ public class TripCollaborationService {
                 .clientRequestId(command.getClientRequestId())
                 .occurredAt(LocalDateTime.now())
                 .payload(changed)
+                .build());
+    }
+
+    @Transactional
+    public void delete(Long tripId, Principal principal, TripEditCommand<DeleteSchedulePayload> command) {
+        Long memberId = extractMemberId(principal);
+        validateParticipant(tripId, memberId);
+        validateRevision(tripId, command.getBaseRevision());
+
+        DeleteSchedulePayload payload = command.getPayload();
+        TripScheduleSnapshot snapshot = tripScheduleRepository.findSnapshot(tripId, payload.getTripScheduleId());
+        if (snapshot == null) {
+            throw new CustomException(ErrorCode.TRIP_SCHEDULE_NOT_FOUND);
+        }
+
+        tripScheduleRepository.deleteById(snapshot.getTripScheduleId());
+        tripScheduleRepository.decreaseSortOrdersAfterDelete(snapshot.getOldTripDayId(), snapshot.getSortOrder());
+
+        Long newRevision = tripRepository.increaseRevision(tripId);
+
+        publishAfterCommit(tripId, TripChangedEvent.builder()
+                .eventType("SCHEDULE_DELETED")
+                .tripId(tripId)
+                .revision(newRevision)
+                .actorMemberId(memberId)
+                .clientRequestId(command.getClientRequestId())
+                .occurredAt(LocalDateTime.now())
+                .payload(Map.of(
+                        "tripScheduleId", snapshot.getTripScheduleId(),
+                        "tripDayId", snapshot.getOldTripDayId(),
+                        "deletedSortOrder", snapshot.getSortOrder()
+                ))
                 .build());
     }
 
