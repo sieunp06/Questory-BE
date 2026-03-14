@@ -6,10 +6,7 @@ import com.ssafy.questory.member.domain.SecurityMember;
 import com.ssafy.questory.plan.dto.command.TripEditCommand;
 import com.ssafy.questory.plan.dto.event.TripChangedAfterCommitEvent;
 import com.ssafy.questory.plan.dto.event.TripChangedEvent;
-import com.ssafy.questory.plan.dto.payload.AddSchedulePayload;
-import com.ssafy.questory.plan.dto.payload.DeleteSchedulePayload;
-import com.ssafy.questory.plan.dto.payload.ReorderSchedulesPayload;
-import com.ssafy.questory.plan.dto.payload.UpdateMemoPayload;
+import com.ssafy.questory.plan.dto.payload.*;
 import com.ssafy.questory.plan.dto.ws.TripScheduleWsDto;
 import com.ssafy.questory.trip.domain.TripScheduleInsertCommand;
 import com.ssafy.questory.trip.domain.TripScheduleSnapshot;
@@ -32,16 +29,17 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class TripCollaborationService {
-    private final TripRepository tripRepository;
-    private final TripScheduleRepository tripScheduleRepository;
-    private final TripPermissionRepository tripPermissionRepository;
+    private static final int TEMP_OFFSET = 1_000_000;
+    private static final int TEMP_ORDER = 1_000_000;
 
+    private final TripRepository tripRepository;
+    private final TripPermissionRepository tripPermissionRepository;
+    private final TripScheduleRepository tripScheduleRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void add(Long tripId, Principal principal, TripEditCommand<AddSchedulePayload> command) {
         Long memberId = extractMemberId(principal);
-
         validateParticipant(tripId, memberId);
         validateRevision(tripId, command.getBaseRevision());
 
@@ -60,9 +58,15 @@ public class TripCollaborationService {
                 .build();
 
         tripScheduleRepository.insert(insertCommand);
+
+        if (insertCommand.getTripScheduleId() == null) {
+            throw new CustomException(ErrorCode.TRIP_SCHEDULE_NOT_FOUND);
+        }
+
         TripScheduleWsDto created = tripScheduleRepository.findWsDtoById(insertCommand.getTripScheduleId());
 
-        Long newRevision = tripRepository.increaseRevision(tripId);
+        tripRepository.increaseRevision(tripId);
+        Long newRevision = tripRepository.findRevisionById(tripId);
 
         publishAfterCommit(tripId, TripChangedEvent.builder()
                 .eventType("SCHEDULE_ADDED")
@@ -88,10 +92,15 @@ public class TripCollaborationService {
             throw new CustomException(ErrorCode.TRIP_SCHEDULE_NOT_FOUND);
         }
 
-        tripScheduleRepository.updateMemo(payload.getTripScheduleId(), payload.getMemo());
+        int updated = tripScheduleRepository.updateMemo(payload.getTripScheduleId(), payload.getMemo());
+        if (updated == 0) {
+            throw new CustomException(ErrorCode.TRIP_SCHEDULE_NOT_FOUND);
+        }
 
         TripScheduleWsDto changed = tripScheduleRepository.findWsDtoById(payload.getTripScheduleId());
-        Long newRevision = tripRepository.increaseRevision(tripId);
+
+        tripRepository.increaseRevision(tripId);
+        Long newRevision = tripRepository.findRevisionById(tripId);
 
         publishAfterCommit(tripId, TripChangedEvent.builder()
                 .eventType("SCHEDULE_UPDATED")
@@ -111,15 +120,21 @@ public class TripCollaborationService {
         validateRevision(tripId, command.getBaseRevision());
 
         DeleteSchedulePayload payload = command.getPayload();
+
         TripScheduleSnapshot snapshot = tripScheduleRepository.findSnapshot(tripId, payload.getTripScheduleId());
         if (snapshot == null) {
             throw new CustomException(ErrorCode.TRIP_SCHEDULE_NOT_FOUND);
         }
 
-        tripScheduleRepository.deleteById(snapshot.getTripScheduleId());
-        tripScheduleRepository.decreaseSortOrdersAfterDelete(snapshot.getOldTripDayId(), snapshot.getSortOrder());
+        int deleted = tripScheduleRepository.deleteById(snapshot.getTripScheduleId());
+        if (deleted == 0) {
+            throw new CustomException(ErrorCode.TRIP_SCHEDULE_NOT_FOUND);
+        }
 
-        Long newRevision = tripRepository.increaseRevision(tripId);
+        compactAfterDelete(snapshot.getOldTripDayId(), snapshot.getSortOrder());
+
+        tripRepository.increaseRevision(tripId);
+        Long newRevision = tripRepository.findRevisionById(tripId);
 
         publishAfterCommit(tripId, TripChangedEvent.builder()
                 .eventType("SCHEDULE_DELETED")
@@ -148,20 +163,29 @@ public class TripCollaborationService {
         List<Long> currentIds = tripScheduleRepository.findScheduleIdsByTripDayId(payload.getTripDayId());
         List<Long> requestedIds = payload.getOrderedScheduleIds();
 
+        if (requestedIds == null || requestedIds.isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
         if (currentIds.size() != requestedIds.size()
                 || !new HashSet<>(currentIds).equals(new HashSet<>(requestedIds))) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
-        tripScheduleRepository.bumpSortOrdersTemporarily(payload.getTripDayId());
+        tripScheduleRepository.bumpSortOrdersTemporarily(payload.getTripDayId(), TEMP_OFFSET);
 
         int sortOrder = 1;
         for (Long scheduleId : requestedIds) {
-            tripScheduleRepository.updateSortOrder(scheduleId, sortOrder++);
+            int updated = tripScheduleRepository.updateSortOrder(scheduleId, sortOrder++);
+            if (updated == 0) {
+                throw new CustomException(ErrorCode.TRIP_SCHEDULE_NOT_FOUND);
+            }
         }
 
         List<TripScheduleWsDto> changed = tripScheduleRepository.findWsDtosByTripDayId(payload.getTripDayId());
-        Long newRevision = tripRepository.increaseRevision(tripId);
+
+        tripRepository.increaseRevision(tripId);
+        Long newRevision = tripRepository.findRevisionById(tripId);
 
         publishAfterCommit(tripId, TripChangedEvent.builder()
                 .eventType("SCHEDULE_REORDERED")
@@ -175,6 +199,119 @@ public class TripCollaborationService {
                         "schedules", changed
                 ))
                 .build());
+    }
+
+    @Transactional
+    public void move(Long tripId, Principal principal, TripEditCommand<MoveSchedulePayload> command) {
+        Long memberId = extractMemberId(principal);
+        validateParticipant(tripId, memberId);
+        validateRevision(tripId, command.getBaseRevision());
+
+        MoveSchedulePayload payload = command.getPayload();
+        validateTripDayBelongsToTrip(tripId, payload.getTargetTripDayId());
+
+        TripScheduleSnapshot snapshot = tripScheduleRepository.findSnapshot(tripId, payload.getTripScheduleId());
+        if (snapshot == null) {
+            throw new CustomException(ErrorCode.TRIP_SCHEDULE_NOT_FOUND);
+        }
+
+        Long sourceTripDayId = snapshot.getOldTripDayId();
+        Long targetTripDayId = payload.getTargetTripDayId();
+
+        if (Objects.equals(sourceTripDayId, targetTripDayId)) {
+            moveWithinSameDay(snapshot, payload);
+        } else {
+            moveAcrossDay(snapshot, payload);
+        }
+
+        TripScheduleWsDto changed = tripScheduleRepository.findWsDtoById(payload.getTripScheduleId());
+        List<TripScheduleWsDto> sourceSchedules = tripScheduleRepository.findWsDtosByTripDayId(sourceTripDayId);
+        List<TripScheduleWsDto> targetSchedules = tripScheduleRepository.findWsDtosByTripDayId(targetTripDayId);
+
+        tripRepository.increaseRevision(tripId);
+        Long newRevision = tripRepository.findRevisionById(tripId);
+
+        publishAfterCommit(tripId, TripChangedEvent.builder()
+                .eventType("SCHEDULE_MOVED")
+                .tripId(tripId)
+                .revision(newRevision)
+                .actorMemberId(memberId)
+                .clientRequestId(command.getClientRequestId())
+                .occurredAt(LocalDateTime.now())
+                .payload(Map.of(
+                        "movedSchedule", changed,
+                        "sourceTripDayId", sourceTripDayId,
+                        "targetTripDayId", targetTripDayId,
+                        "sourceSchedules", sourceSchedules,
+                        "targetSchedules", targetSchedules
+                ))
+                .build());
+    }
+
+    private void moveWithinSameDay(TripScheduleSnapshot snapshot, MoveSchedulePayload payload) {
+        Long tripDayId = snapshot.getOldTripDayId();
+        Integer currentOrder = snapshot.getSortOrder();
+        Integer targetOrder = payload.getTargetOrder();
+
+        if (Objects.equals(currentOrder, targetOrder)) {
+            return;
+        }
+
+        int maxOrder = tripScheduleRepository.countByTripDayId(tripDayId);
+        validateTargetOrder(targetOrder, maxOrder);
+
+        tripScheduleRepository.moveToTemporaryOrder(snapshot.getTripScheduleId(), TEMP_ORDER);
+
+        if (targetOrder < currentOrder) {
+            tripScheduleRepository.bumpIncreaseRange(tripDayId, targetOrder, currentOrder - 1, TEMP_OFFSET);
+            tripScheduleRepository.normalizeIncreaseRange(
+                    tripDayId,
+                    targetOrder + TEMP_OFFSET,
+                    currentOrder - 1 + TEMP_OFFSET,
+                    TEMP_OFFSET
+            );
+        } else {
+            tripScheduleRepository.bumpDecreaseRange(tripDayId, currentOrder + 1, targetOrder, TEMP_OFFSET);
+            tripScheduleRepository.normalizeDecreaseRange(
+                    tripDayId,
+                    currentOrder + 1 + TEMP_OFFSET,
+                    targetOrder + TEMP_OFFSET,
+                    TEMP_OFFSET
+            );
+        }
+
+        tripScheduleRepository.updateTripDayAndSortOrder(
+                snapshot.getTripScheduleId(),
+                tripDayId,
+                targetOrder
+        );
+    }
+
+    private void moveAcrossDay(TripScheduleSnapshot snapshot, MoveSchedulePayload payload) {
+        Long sourceTripDayId = snapshot.getOldTripDayId();
+        Long targetTripDayId = payload.getTargetTripDayId();
+
+        int targetCount = tripScheduleRepository.countByTripDayId(targetTripDayId);
+        int targetOrder = payload.getTargetOrder() == null ? targetCount + 1 : payload.getTargetOrder();
+        validateTargetOrder(targetOrder, targetCount + 1);
+
+        tripScheduleRepository.moveToTemporaryOrder(snapshot.getTripScheduleId(), TEMP_ORDER);
+
+        compactAfterDelete(sourceTripDayId, snapshot.getSortOrder());
+
+        tripScheduleRepository.bumpIncreaseFrom(targetTripDayId, targetOrder, TEMP_OFFSET);
+        tripScheduleRepository.normalizeIncreaseFrom(targetTripDayId, targetOrder + TEMP_OFFSET, TEMP_OFFSET);
+
+        tripScheduleRepository.updateTripDayAndSortOrder(
+                snapshot.getTripScheduleId(),
+                targetTripDayId,
+                targetOrder
+        );
+    }
+
+    private void compactAfterDelete(Long tripDayId, Integer deletedSortOrder) {
+        tripScheduleRepository.bumpSortOrdersAfterDelete(tripDayId, deletedSortOrder, TEMP_OFFSET);
+        tripScheduleRepository.normalizeSortOrdersAfterDelete(tripDayId, TEMP_OFFSET);
     }
 
     private Long extractMemberId(Principal principal) {
@@ -200,6 +337,12 @@ public class TripCollaborationService {
         }
     }
 
+    private void validateTripDayBelongsToTrip(Long tripId, Long tripDayId) {
+        if (!tripScheduleRepository.existsTripDayInTrip(tripId, tripDayId)) {
+            throw new CustomException(ErrorCode.TRIP_DAY_NOT_FOUND);
+        }
+    }
+
     private void validateRevision(Long tripId, Long baseRevision) {
         Long currentRevision = tripRepository.findRevisionById(tripId);
         if (!Objects.equals(currentRevision, baseRevision)) {
@@ -207,9 +350,9 @@ public class TripCollaborationService {
         }
     }
 
-    private void validateTripDayBelongsToTrip(Long tripId, Long tripDayId) {
-        if (!tripScheduleRepository.existsTripDayInTrip(tripId, tripDayId)) {
-            throw new CustomException(ErrorCode.TRIP_DAY_NOT_FOUND);
+    private void validateTargetOrder(Integer targetOrder, Integer maxInclusive) {
+        if (targetOrder == null || targetOrder < 1 || targetOrder > maxInclusive) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
     }
 
