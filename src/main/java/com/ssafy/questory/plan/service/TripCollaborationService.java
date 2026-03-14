@@ -8,6 +8,7 @@ import com.ssafy.questory.plan.dto.event.TripChangedAfterCommitEvent;
 import com.ssafy.questory.plan.dto.event.TripChangedEvent;
 import com.ssafy.questory.plan.dto.payload.AddSchedulePayload;
 import com.ssafy.questory.plan.dto.payload.DeleteSchedulePayload;
+import com.ssafy.questory.plan.dto.payload.ReorderSchedulesPayload;
 import com.ssafy.questory.plan.dto.payload.UpdateMemoPayload;
 import com.ssafy.questory.plan.dto.ws.TripScheduleWsDto;
 import com.ssafy.questory.trip.domain.TripScheduleInsertCommand;
@@ -23,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -129,6 +132,47 @@ public class TripCollaborationService {
                         "tripScheduleId", snapshot.getTripScheduleId(),
                         "tripDayId", snapshot.getOldTripDayId(),
                         "deletedSortOrder", snapshot.getSortOrder()
+                ))
+                .build());
+    }
+
+    @Transactional
+    public void reorder(Long tripId, Principal principal, TripEditCommand<ReorderSchedulesPayload> command) {
+        Long memberId = extractMemberId(principal);
+        validateParticipant(tripId, memberId);
+        validateRevision(tripId, command.getBaseRevision());
+
+        ReorderSchedulesPayload payload = command.getPayload();
+        validateTripDayBelongsToTrip(tripId, payload.getTripDayId());
+
+        List<Long> currentIds = tripScheduleRepository.findScheduleIdsByTripDayId(payload.getTripDayId());
+        List<Long> requestedIds = payload.getOrderedScheduleIds();
+
+        if (currentIds.size() != requestedIds.size()
+                || !new HashSet<>(currentIds).equals(new HashSet<>(requestedIds))) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        tripScheduleRepository.bumpSortOrdersTemporarily(payload.getTripDayId());
+
+        int sortOrder = 1;
+        for (Long scheduleId : requestedIds) {
+            tripScheduleRepository.updateSortOrder(scheduleId, sortOrder++);
+        }
+
+        List<TripScheduleWsDto> changed = tripScheduleRepository.findWsDtosByTripDayId(payload.getTripDayId());
+        Long newRevision = tripRepository.increaseRevision(tripId);
+
+        publishAfterCommit(tripId, TripChangedEvent.builder()
+                .eventType("SCHEDULE_REORDERED")
+                .tripId(tripId)
+                .revision(newRevision)
+                .actorMemberId(memberId)
+                .clientRequestId(command.getClientRequestId())
+                .occurredAt(LocalDateTime.now())
+                .payload(Map.of(
+                        "tripDayId", payload.getTripDayId(),
+                        "schedules", changed
                 ))
                 .build());
     }

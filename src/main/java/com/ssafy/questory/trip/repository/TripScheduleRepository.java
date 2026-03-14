@@ -13,14 +13,18 @@ public interface TripScheduleRepository {
     TripScheduleSnapshot findSnapshot(Long tripId, Long tripScheduleId);
     Integer findNextSortOrder(Long tripDayId);
     TripScheduleWsDto findWsDtoById(Long tripScheduleId);
+    List<Long> findScheduleIdsByTripDayId(Long tripDayId);
+    List<TripScheduleWsDto> findWsDtosByTripDayId(Long tripDayId);
 
     boolean existsTripDayInTrip(Long tripId, Long tripDayId);
+
     void bulkInsert(List<TripScheduleInsertCommand> commands);
-
     void insert(TripScheduleInsertCommand insertCommand);
-
     void updateMemo(Long tripScheduleId, String memo);
     void decreaseSortOrdersAfterDelete(Long oldTripDayId, Integer sortOrder);
+    void bumpSortOrdersTemporarily(Long tripDayId);
+
+    void updateSortOrder(Long scheduleId, int sortOrder);
 
     void deleteById(Long tripScheduleId);
 }

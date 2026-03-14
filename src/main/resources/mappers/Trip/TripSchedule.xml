@@ -53,6 +53,18 @@
         FROM trip_schedule
         WHERE trip_schedule_id = #{tripScheduleId}
     </select>
+    <select id="findScheduleIdsByTripDayId" resultType="long">
+        SELECT trip_schedule_id
+        FROM trip_schedule
+        WHERE trip_day_id = #{tripDayId}
+        ORDER BY sort_order
+    </select>
+    <select id="findWsDtosByTripDayId" resultMap="TripScheduleWsDtoMap">
+        SELECT trip_schedule_id, trip_day_id, attraction_no, title, memo, sort_order
+        FROM trip_schedule
+        WHERE trip_day_id = #{tripDayId}
+        ORDER BY sort_order
+    </select>
 
     <select id="existsTripDayInTrip" resultType="boolean">
         SELECT EXISTS(
@@ -96,6 +108,16 @@
         SET sort_order = sort_order - 1
         WHERE trip_day_id = #{oldTripDayId}
             AND sort_order > #{sortOrder}
+    </update>
+    <update id="bumpSortOrdersTemporarily">
+        UPDATE trip_schedule
+        SET sort_order = sort_order + 1000
+        WHERE trip_day_id = #{tripDayId}
+    </update>
+    <update id="updateSortOrder">
+        UPDATE trip_schedule
+        SET sort_order = #{sortOrder}
+        WHERE trip_schedule_id = #{scheduleId}
     </update>
 
     <delete id="deleteById">
