@@ -3,6 +3,16 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.questory.trip.repository.TripScheduleRepository">
+    <resultMap id="TripScheduleWsDtoMap"
+               type="com.ssafy.questory.plan.dto.ws.TripScheduleWsDto">
+        <id property="tripScheduleId" column="trip_schedule_id"/>
+        <result property="tripDayId" column="trip_day_id"/>
+        <result property="attractionNo" column="attraction_no"/>
+        <result property="title" column="title"/>
+        <result property="memo" column="memo"/>
+        <result property="sortOrder" column="sort_order"/>
+    </resultMap>
+
     <select id="findSnapshotsByTripId" resultType="com.ssafy.questory.trip.domain.TripScheduleSnapshot">
         SELECT  ts.trip_schedule_id,
                 ts.trip_day_id AS oldTripDayId,
@@ -16,6 +26,47 @@
         JOIN trip_day td ON td.trip_day_id = ts.trip_day_id
         WHERE td.trip_id = #{tripId}
         ORDER BY td.trip_date ASC, ts.sort_order ASC, ts.trip_schedule_id ASC
+    </select>
+    <select id="findSnapshot"
+            resultType="com.ssafy.questory.trip.domain.TripScheduleSnapshot">
+        SELECT
+            ts.trip_schedule_id AS tripScheduleId,
+            ts.trip_day_id      AS oldTripDayId,
+            td.trip_date        AS oldTripDate,
+            ts.attraction_no    AS attractionNo,
+            ts.title            AS title,
+            ts.memo             AS memo,
+            ts.sort_order       AS sortOrder,
+            ts.created_by       AS createdBy
+        FROM trip_schedule ts
+        JOIN trip_day td ON td.trip_day_id = ts.trip_day_id
+        WHERE td.trip_id = #{tripId}
+            AND ts.trip_schedule_id = #{tripScheduleId}
+    </select>
+    <select id="findNextSortOrder" resultType="int">
+        SELECT COALESCE(MAX(sort_order), 0) + 1
+        FROM trip_schedule
+        WHERE trip_day_id = #{tripDayId}
+    </select>
+    <select id="findWsDtoById" resultMap="TripScheduleWsDtoMap">
+        SELECT trip_schedule_id, trip_day_id, attraction_no, title, memo, sort_order
+        FROM trip_schedule
+        WHERE trip_schedule_id = #{tripScheduleId}
+    </select>
+    <select id="findScheduleIdsByTripDayId" resultType="long">
+        SELECT trip_schedule_id
+        FROM trip_schedule
+        WHERE trip_day_id = #{tripDayId}
+        ORDER BY sort_order
+    </select>
+
+    <select id="existsTripDayInTrip" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM trip_day
+            WHERE trip_id = #{tripId}
+                AND trip_day_id = #{tripDayId}
+        )
     </select>
 
     <insert id="bulkInsert">
@@ -32,4 +83,130 @@
                 )
             </foreach>
     </insert>
+    <insert id="insert"
+            parameterType="com.ssafy.questory.trip.domain.TripScheduleInsertCommand"
+            useGeneratedKeys="true"
+            keyProperty="tripScheduleId">
+        INSERT INTO trip_schedule (trip_day_id, attraction_no, title, memo, sort_order, created_by)
+        VALUES (#{tripDayId}, #{attractionNo}, #{title}, #{memo}, #{sortOrder}, #{createdBy})
+    </insert>
+
+    <select id="findWsDtosByTripDayId" resultMap="TripScheduleWsDtoMap">
+        SELECT trip_schedule_id, trip_day_id, attraction_no, title, memo, sort_order
+        FROM trip_schedule
+        WHERE trip_day_id = #{tripDayId}
+        ORDER BY sort_order
+    </select>
+
+    <update id="updateMemo">
+        UPDATE trip_schedule
+        SET memo = #{memo},
+            updated_at = NOW()
+        WHERE trip_schedule_id = #{tripScheduleId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM trip_schedule
+        WHERE trip_schedule_id = #{tripScheduleId}
+    </delete>
+
+
+    <update id="bumpSortOrdersTemporarily">
+        UPDATE trip_schedule
+        SET sort_order = sort_order + #{tempOffset},
+            updated_at = NOW()
+        WHERE trip_day_id = #{tripDayId}
+    </update>
+
+    <update id="updateSortOrder">
+        UPDATE trip_schedule
+        SET sort_order = #{sortOrder},
+            updated_at = NOW()
+        WHERE trip_schedule_id = #{tripScheduleId}
+    </update>
+
+    <select id="countByTripDayId" resultType="int">
+        SELECT COUNT(*)
+        FROM trip_schedule
+        WHERE trip_day_id = #{tripDayId}
+    </select>
+
+    <update id="moveToTemporaryOrder">
+        UPDATE trip_schedule
+        SET sort_order = #{temporarySortOrder},
+            updated_at = NOW()
+        WHERE trip_schedule_id = #{tripScheduleId}
+    </update>
+
+    <update id="bumpSortOrdersAfterDelete">
+        UPDATE trip_schedule
+        SET sort_order = sort_order + #{tempOffset},
+            updated_at = NOW()
+        WHERE trip_day_id = #{tripDayId}
+            AND sort_order > #{deletedSortOrder}
+    </update>
+
+    <update id="normalizeSortOrdersAfterDelete">
+        UPDATE trip_schedule
+        SET sort_order = sort_order - #{tempOffset} - 1,
+            updated_at = NOW()
+        WHERE trip_day_id = #{tripDayId}
+            AND sort_order > #{tempOffset}
+    </update>
+
+    <update id="bumpIncreaseRange">
+        UPDATE trip_schedule
+        SET sort_order = sort_order + #{tempOffset},
+            updated_at = NOW()
+        WHERE trip_day_id = #{tripDayId}
+            AND sort_order BETWEEN #{from} AND #{to}
+    </update>
+
+    <update id="normalizeIncreaseRange">
+        UPDATE trip_schedule
+        SET sort_order = sort_order - #{tempOffset} + 1,
+            updated_at = NOW()
+        WHERE trip_day_id = #{tripDayId}
+            AND sort_order BETWEEN #{fromTemp} AND #{toTemp}
+    </update>
+
+    <update id="bumpDecreaseRange">
+        UPDATE trip_schedule
+        SET sort_order = sort_order + #{tempOffset},
+            updated_at = NOW()
+        WHERE trip_day_id = #{tripDayId}
+            AND sort_order BETWEEN #{from} AND #{to}
+    </update>
+
+    <update id="normalizeDecreaseRange">
+        UPDATE trip_schedule
+        SET sort_order = sort_order - #{tempOffset} - 1,
+            updated_at = NOW()
+        WHERE trip_day_id = #{tripDayId}
+            AND sort_order BETWEEN #{fromTemp} AND #{toTemp}
+    </update>
+
+    <update id="bumpIncreaseFrom">
+        UPDATE trip_schedule
+        SET sort_order = sort_order + #{tempOffset},
+            updated_at = NOW()
+        WHERE trip_day_id = #{tripDayId}
+            AND sort_order >= #{fromSortOrder}
+    </update>
+
+    <update id="normalizeIncreaseFrom">
+        UPDATE trip_schedule
+        SET sort_order = sort_order - #{tempOffset} + 1,
+            updated_at = NOW()
+        WHERE trip_day_id = #{tripDayId}
+            AND sort_order >= #{fromTemp}
+    </update>
+
+    <update id="updateTripDayAndSortOrder">
+        UPDATE trip_schedule
+        SET trip_day_id = #{tripDayId},
+            sort_order = #{sortOrder},
+        updated_at = NOW()
+        WHERE trip_schedule_id = #{tripScheduleId}
+    </update>
 </mapper>
